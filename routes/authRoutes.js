@@ -12,7 +12,9 @@ router.post('/register', validate, async (req, res) => {
 
         // Check if user exists
         const user = await pool.query(
-            'SELECT * FROM users WHERE email = $1 OR username = $2',
+            `SELECT * FROM users
+                WHERE email = $1
+                OR username = $2`,
             [email, username]
         )
         // Throw error if user exists
@@ -21,22 +23,24 @@ router.post('/register', validate, async (req, res) => {
         }
         // Hash new user's password
         if (user.rows.length === 0) {
+            let { password } = req.body;
+
             bcrypt.genSalt(10, (err, salt) => {
                 if (err) throw new Error(err);
-                bcrypt.hash(req.body.password, salt, async (err, hash) => {
+                bcrypt.hash(password, salt, async (err, hash) => {
                     if (err) throw new Error(err);
-                    req.body.password = hash;
+                    password = hash;
 
                     // Enter new user into db
                     const newUser = await pool.query(
                         `INSERT INTO users (first_name, last_name, username, email, password, admin)
-                        VALUES ($1, $2, $3, $4, $5, $6)
-                        RETURNING *`,
-                        [first_name, last_name, username, email, req.body.password, admin]
+                            VALUES ($1, $2, $3, $4, $5, $6)
+                            RETURNING *`,
+                        [first_name, last_name, username, email, password, admin]
                     )
                     // Generate jwt token
                     const token = jwtGenerator(newUser.rows[0].user_id);
-                    res.status(200).json({ token });
+                    res.status(200).json(token);
                 })
             })
         }
@@ -67,7 +71,11 @@ router.post('/login', validate, async (req, res) => {
 
         // Provide token if successful
         const token = jwtGenerator(user.rows[0].user_id);
-        res.status(200).json({ token });
+        res.status(200).json({
+            token,
+            isAdmin: user.rows[0].isAdmin,
+            user_id: user.rows[0].user_id
+        });
 
     } catch (err) {
         res.status(500).send('Server error');
@@ -76,7 +84,7 @@ router.post('/login', validate, async (req, res) => {
 
 router.get('/verify', authorizeToken, (req, res) => {
     try {
-        res.status(200).json(true);
+        res.status(200).json({ authorized: true });
     } catch (err) {
         res.status(500).send('Server error');
     }

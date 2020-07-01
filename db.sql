@@ -8,12 +8,12 @@ CREATE TABLE users (
     username VARCHAR(255) NOT NULL UNIQUE,
     email VARCHAR(255) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
-    admin BOOLEAN
+    isAdmin BOOLEAN NOT NULL
 );
 
 CREATE TABLE projects (
     project_id SERIAL PRIMARY KEY,
-    status VARCHAR(255),
+    status VARCHAR(255) NOT NULL,
     project_name VARCHAR(255) NOT NULL,
     details VARCHAR(255) NOT NULL,
     start_date DATE,
@@ -21,9 +21,9 @@ CREATE TABLE projects (
 );
 
 CREATE TABLE entries (
-    entries_id SERIAL PRIMARY KEY,
-    user_id uuid,
-    project_id INT,
+    entry_id SERIAL PRIMARY KEY,
+    user_id uuid NOT NULL,
+    project_id INT NOT NULL,
     date DATE NOT NULL,
     hours_worked INT NOT NULL,
     details VARCHAR(255),
@@ -33,21 +33,21 @@ CREATE TABLE entries (
 
 CREATE TABLE user_projects (
     user_projects_id SERIAL PRIMARY KEY,
-    user_id uuid,
-    project_id INT,
+    user_id uuid NOT NULL,
+    project_id INT NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(user_id),
     FOREIGN KEY (project_id) REFERENCES projects(project_id)
 );
 
 -- THIS CAN BE CREATED VIA JOIN UPON REQUEST
--- CREATE TABLE weekly_reports (
---     report_id SERIAL PRIMARY KEY,
---     user_id FOREIGN KEY REFERENCES users(user_id),
---     start_date DATE,
---     end_date DATE,
---     total_entries INT,
---     total_hours INT
--- );
+CREATE TABLE weekly_reports (
+    report_id SERIAL PRIMARY KEY,
+    user_id FOREIGN KEY REFERENCES users(user_id),
+    start_date DATE,
+    end_date DATE,
+    total_entries INT,
+    total_hours INT
+);
 
 INSERT INTO projects (project_name, details)
 VALUES ('Project 1', 'Details coming soon')
