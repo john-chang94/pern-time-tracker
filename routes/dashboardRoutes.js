@@ -2,6 +2,7 @@ const router = require('express').Router();
 const pool = require('../db');
 const validate = require('../middleware/validate');
 const authorizeToken = require('../middleware/authorizeToken');
+const { route } = require('./authRoutes');
 
 // Get all projects assigned to the logged in user
 router.get('/projects/:id', authorizeToken, async (req, res) => {
@@ -18,7 +19,7 @@ router.get('/projects/:id', authorizeToken, async (req, res) => {
         if (projects.rows.length === 0) {
             return res.status(404).send('No assigned projects');
         }
-        return res.status(200).json(projects.rows);
+        res.status(200).json(projects.rows);
 
     } catch (err) {
         res.status(500).send('Server error');
@@ -38,7 +39,7 @@ router.get('/entries/:id', authorizeToken, async (req, res) => {
         if (entries.rows.length === 0) {
             return res.status(404).send('No submitted entries');
         }
-        return res.status(200).json(entries.rows);
+        res.status(200).json(entries.rows);
 
     } catch (err) {
         res.status(500).send('Server error');
@@ -46,18 +47,30 @@ router.get('/entries/:id', authorizeToken, async (req, res) => {
 })
 
 // Post a time entry
-router.post('/create_entry', validate, authorizeToken, async (req, res) => {
+router.post('/post_entry', validate, authorizeToken, async (req, res) => {
     try {
         const { user_id, project_id, date, hours_worked, details } = req.body;
-        const project = await pool.query(
+
+        // Check if an entry exists for the same date
+        const findEntry = await pool.query(
+            'SELECT * FROM entries WHERE date = $1',
+            [date]
+        )
+        if (findEntry.rows.length !== 0) {
+            return res.status(400).send('Maximum one time entry per day. Update or remove current entry.');
+        }
+
+        const entry = await pool.query(
             `INSERT INTO entries (user_id, project_id, date, hours_worked, details)
                 VALUES ($1, $2, $3, $4, $5)
                 RETURNING *`,
             [user_id, project_id, date, hours_worked, details]
         )
-        if (project.rows.length !== 0) {
-            return res.status(200).json(project.rows[0]);
-        }
+        res.status(200).json({
+            message: 'Submission success',
+            entry: entry.rows[0]
+        });
+
     } catch (err) {
         res.status(500).send('Server error');
     }
@@ -68,7 +81,7 @@ router.put('/update_entry/:entry_id', validate, authorizeToken, async (req, res)
     try {
         const { entry_id } = req.params;
         const { project_id, date, hours_worked, details } = req.body;
-        const project = await pool.query(
+        const entry = await pool.query(
             `UPDATE entries
                 SET project_id = $1,
                     date = $2,
@@ -79,9 +92,10 @@ router.put('/update_entry/:entry_id', validate, authorizeToken, async (req, res)
                 RETURNING *`,
             [project_id, date, hours_worked, details, entry_id, req.id] // req.id is provided in token creation
         )
-        if (project.rows.length !== 0) {
-            return res.status(200).json(project.rows[0]);
-        }
+        res.status(200).json({
+            message: 'Update success',
+            entry: entry.rows[0]
+        });
 
     } catch (err) {
         res.status(500).send('Server error');
@@ -102,7 +116,46 @@ router.delete('/delete_entry/:entry_id', authorizeToken, async (req, res) => {
         if (deletedEntry.rows.length === 0) {
             return res.status(404).send('Entry not found');
         }
-        return res.status(200).json(deletedEntry.rows[0]);
+        res.status(200).json({
+            message: 'Delete success',
+            deleted: deletedEntry.rows[0]
+        });
+
+    } catch (err) {
+        res.status(500).send('Server error');
+    }
+})
+
+router.get('/timesheets/:id', authorizeToken, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const timesheets = await pool.query(
+            'SELECT * FROM weekly_timesheets WHERE user_id = $1',
+            [id]
+        )
+        if (timesheets.rows.length === 0) {
+            return res.status(404).send('No submitted timesheets');
+        }
+        res.status(200).json(timesheets.rows);
+
+    } catch (err) {
+        res.status(500).send('Server error');
+    }
+})
+
+router.post('/post_timesheet', authorizeToken, async (req, res) => {
+    try {
+        const { user_id, week_start, week_end, total_entries, total_hours } = req.body;
+        const timesheet = await pool.query(
+            `INSERT INTO weekly_timesheets (user_id, week_start, week_end, total_entries, total_hours)
+                VALUES ($1, $2, $3, $4, $5)
+                RETURNING *`,
+            [user_id, week_start, week_end, total_entries, total_hours]
+        )
+        res.status(200).json({
+            message: 'Submit success',
+            timesheet: timesheet.rows[0]
+        });
 
     } catch (err) {
         res.status(500).send('Server error');

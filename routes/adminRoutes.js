@@ -12,7 +12,7 @@ router.get('/entries', authorizeToken, async (req, res) => {
         if (entries.rows.length === 0) {
             return res.status(404).send('No submitted entries');
         }
-        return res.status(200).json(entries.rows);
+        res.status(200).json(entries.rows);
 
     } catch (err) {
         res.status(500).send('Server error');
@@ -28,7 +28,23 @@ router.get('/projects', authorizeToken, async (req, res) => {
         if (projects.rows.length === 0) {
             return res.status(404).send('No assigned projects');
         }
-        return res.status(200).json(projects.rows);
+        res.status(200).json(projects.rows);
+
+    } catch (err) {
+        res.status(500).send('Server error');
+    }
+})
+
+// Get all users
+router.get('/users', authorizeToken, async (req, res) => {
+    try {
+        const users = await pool.query(
+            'SELECT * FROM users'
+        )
+        if (users.rows.length === 0) {
+            return res.status(404).send('No registered users');
+        }
+        res.status(200).json(users.rows);
 
     } catch (err) {
         res.status(500).send('Server error');

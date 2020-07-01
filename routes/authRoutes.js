@@ -40,7 +40,10 @@ router.post('/register', validate, async (req, res) => {
                     )
                     // Generate jwt token
                     const token = jwtGenerator(newUser.rows[0].user_id);
-                    res.status(200).json(token);
+                    res.status(200).json({
+                        message: 'Register success',
+                        token
+                    });
                 })
             })
         }
@@ -72,9 +75,10 @@ router.post('/login', validate, async (req, res) => {
         // Provide token if successful
         const token = jwtGenerator(user.rows[0].user_id);
         res.status(200).json({
-            token,
+            message: 'Login success',
             isAdmin: user.rows[0].isAdmin,
-            user_id: user.rows[0].user_id
+            user_id: user.rows[0].user_id,
+            token
         });
 
     } catch (err) {

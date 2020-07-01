@@ -24,7 +24,7 @@ CREATE TABLE entries (
     entry_id SERIAL PRIMARY KEY,
     user_id uuid NOT NULL,
     project_id INT NOT NULL,
-    date DATE NOT NULL,
+    date DATE NOT NULL UNIQUE,
     hours_worked INT NOT NULL,
     details VARCHAR(255),
     FOREIGN KEY (user_id) REFERENCES users(user_id),
@@ -39,14 +39,14 @@ CREATE TABLE user_projects (
     FOREIGN KEY (project_id) REFERENCES projects(project_id)
 );
 
--- THIS CAN BE CREATED VIA JOIN UPON REQUEST
-CREATE TABLE weekly_reports (
-    report_id SERIAL PRIMARY KEY,
-    user_id FOREIGN KEY REFERENCES users(user_id),
-    start_date DATE,
-    end_date DATE,
-    total_entries INT,
-    total_hours INT
+CREATE TABLE weekly_timesheets (
+    timesheet_id SERIAL PRIMARY KEY,
+    user_id uuid NOT NULL,
+    week_start DATE NOT NULL,
+    week_end DATE NOT NULL,
+    total_entries INT NOT NULL,
+    total_hours INT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
 );
 
 INSERT INTO projects (project_name, details)
@@ -57,6 +57,9 @@ INSERT INTO user_projects (user_id, project_id)
 VALUES ('b04f55ea-57fc-446a-8533-b69d55ff785b', 1)
 VALUES ('b04f55ea-57fc-446a-8533-b69d55ff785b', 2)
 VALUES ('6a972509-7d2e-4a57-8f00-a0712da6e5da', 2);
+
+INSERT INTO weekly_timesheets (user_id, week_start, week_end, total_entries, total_hours)
+VALUES ('b04f55ea-57fc-446a-8533-b69d55ff785b', '2020-06-28', '2020-07-04', 5, 38);
 
 -- Example query to grab many to many relationships
 SELECT u.first_name, p.project_id FROM users AS u
