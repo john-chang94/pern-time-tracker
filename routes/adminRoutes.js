@@ -3,11 +3,11 @@ const pool = require('../db');
 const validate = require('../middleware/validate');
 const authorizeToken = require('../middleware/authorizeToken');
 
-// Get all entries
+// Get all time entries
 router.get('/entries', authorizeToken, async (req, res) => {
     try {
         const entries = await pool.query(
-            'SELECT * FROM entries'
+            'SELECT * FROM entries ORDER BY date DESC'
         )
         if (entries.rows.length === 0) {
             return res.status(404).send('No submitted entries');
@@ -51,6 +51,20 @@ router.get('/users', authorizeToken, async (req, res) => {
     }
 })
 
+// Get all timesheets
+router.get('/timesheets', authorizeToken, async (req, res) => {
+    try {
+        const timesheets = await pool.query(
+            'SELECT * FROM weekly_timesheets ORDER BY week_start DESC'
+        )
+        if (timesheets.rows.length === 0) {
+            return res.status(404).send('No submitted timesheets');
+        }
+        res.status(200).json(timesheets.rows);
 
+    } catch (err) {
+        res.status(500).send('Server error');
+    }
+})
 
 module.exports = router;

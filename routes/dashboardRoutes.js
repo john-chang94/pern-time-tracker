@@ -126,11 +126,14 @@ router.delete('/delete_entry/:entry_id', authorizeToken, async (req, res) => {
     }
 })
 
+// Get all timesheets submitted by the logged in user
 router.get('/timesheets/:id', authorizeToken, async (req, res) => {
     try {
         const { id } = req.params;
         const timesheets = await pool.query(
-            'SELECT * FROM weekly_timesheets WHERE user_id = $1',
+            `SELECT * FROM weekly_timesheets
+                WHERE user_id = $1
+                ORDER BY week_start DESC`,
             [id]
         )
         if (timesheets.rows.length === 0) {
@@ -143,6 +146,7 @@ router.get('/timesheets/:id', authorizeToken, async (req, res) => {
     }
 })
 
+// Submit a weekly timesheet
 router.post('/post_timesheet', authorizeToken, async (req, res) => {
     try {
         const { user_id, week_start, week_end, total_entries, total_hours } = req.body;
