@@ -53,8 +53,10 @@ router.post('/post_entry', validate, authorizeToken, async (req, res) => {
 
         // Check if an entry exists for the same date
         const findEntry = await pool.query(
-            'SELECT * FROM entries WHERE date = $1',
-            [date]
+            `SELECT * FROM entries
+                WHERE user_id = $1
+                AND date = $2`,
+            [user_id ,date]
         )
         if (findEntry.rows.length !== 0) {
             return res.status(400).send('Maximum one time entry per day. Update or remove current entry.');

@@ -32,7 +32,7 @@ module.exports = (req, res, next) => {
         } else if (!validEmail(email)) {
             return res.status(401).send("Invalid Email");
         }
-    } else if (req.path === '/create_project') {
+    } else if (req.path === '/post_project') {
         if (![status].every(Boolean)) {
             return res.status(400).send('Project status required');
         }
@@ -46,7 +46,7 @@ module.exports = (req, res, next) => {
         if (![username, password].every(Boolean)) {
             return res.status(401).send("Missing Credentials");
         }
-    } else if (req.path === '/create_entry' || req.path === '/update_entry') {
+    } else if (req.path === '/post_entry' || req.path === '/update_entry') {
         if (![user_id].every(Boolean)) {
             return res.status(400).send("User ID is required");
         }
