@@ -68,143 +68,215 @@ router.get('/timesheets', authorizeToken, async (req, res) => {
     }
 })
 
-router.get('/entries/search', authorizeToken, async (req, res) => {
+router.get('/entries/search', validate, authorizeToken, async (req, res) => {
     try {
         const { user_id, start_date, end_date } = req.query;
 
-        // Get all time entries for a user between two dates
-        if (user_id && start_date && end_date) {
-            const userEntries = await pool.query(
-                `SELECT * FROM entries
-                    WHERE user_id = $1
-                    AND date >= $2
-                    AND date <= $3`,
-                [user_id, start_date, end_date]
-            )
-            if (userEntries.rows.length === 0) {
-                return res.status(404).send('No entries found');
-            }
-            res.status(200).json(userEntries.rows);
-
-            // Get all time entries for a user from a date and forward
-        } else if (user_id && start_date && !end_date) {
-            const userEntries = await pool.query(
-                `SELECT * FROM entries
-                    WHERE user_id = $1
-                    AND date >= $2`,
-                [user_id, start_date]
-            )
-            if (userEntries.rows.length === 0) {
-                return res.status(404).send('No entries found');
-            }
-            res.status(200).json(userEntries.rows);
-
-            // Get all time entries for a user from a date and prior
-        } else if (user_id && !start_date && end_date) {
-            const userEntries = await pool.query(
-                `SELECT * FROM entries
-                    WHERE user_id = $1
-                    AND date <= $2`,
-                [user_id, end_date]
-            )
-            if (userEntries.rows.length === 0) {
-                return res.status(404).send('No entries found');
-            }
-            res.status(200).json(userEntries.rows);
-
-            // Get all time entries for a user
-        } else if (user_id && !start_date && !end_date) {
-            const userEntries = await pool.query(
-                'SELECT * FROM entries WHERE user_id = $1',
-                [user_id]
-            )
-            if (userEntries.rows.length === 0) {
-                return res.status(404).send('No entries found');
-            }
-            res.status(200).json(userEntries.rows);
-
-            // Return error if a user is not selected in any search
-        } else if (
-            (!user_id && !start_date && !end_date)
-            || (!user_id &&
-                (start_date && end_date)
-                || (!start_date && end_date)
-                || (start_date && !end_date)
-                )
-            ) {
-            res.status(400).send('Please select a user');
+        // Get all entries for a selected user
+        const userEntries = await pool.query(
+            `SELECT * FROM entries
+                WHERE user_id = $1
+                AND date >= $2
+                AND date <= $3`,
+            [user_id, start_date, end_date]
+        )
+        // Get aggregated for a selected user
+        const userEntriesTotal = await pool.query(
+            `SELECT
+                COUNT(entry_id) AS entry_count,
+                COUNT(DISTINCT project_id) AS project_count,
+                SUM(hours_worked) AS total_hours
+            FROM entries
+                WHERE user_id = $1`,
+            [user_id]
+        )
+        if (userEntries.rows.length === 0) {
+            return res.status(404).send('No time entries found');
         }
+        res.status(200).json({
+            userEntries: userEntries.rows,
+            userEntriesTotal: userEntriesTotal.rows[0]
+        });
 
     } catch (err) {
         res.status(500).send('Server error');
     }
 })
 
-router.get('/timesheets/search', authorizeToken, async (req, res) => {
+router.get('/timesheets/search', validate, authorizeToken, async (req, res) => {
     try {
         const { user_id, start_date, end_date } = req.query;
-        
-        if (user_id && start_date && end_date) {
-            const userTimesheets = await pool.query(
-                `SELECT * FROM weekly_timesheets
-                    WHERE user_id = $1
-                    AND week_start >= $2
-                    AND week_end <= $3`,
-                [user_id, start_date, end_date]
-            )
-            if (userTimesheets.rows.length === 0) {
-                return res.status(404).send('No timesheets found');
-            }
-            res.status(200).json(userTimesheets.rows);
 
-        } else if (user_id && start_date && !end_date) {
-            const userTimesheets = await pool.query(
-                `SELECT * FROM weekly_timesheets
-                    WHERE user_id = $1
-                    AND week_start >= $2`,
-                [user_id, start_date]
-            )
-            if (userTimesheets.rows.length === 0) {
-                return res.status(404).send('No timesheets found');
-            }
-            res.status(200).json(userTimesheets);
-
-        } else if (user_id && !start_date && end_date) {
-            const userTimesheets = await pool.query(
-                `SELECT * FROM weekly_timesheets
-                    WHERE user_id = $1
-                    AND week_start <= $2`,
-                [user_id, end_date]
-            )
-            if (userTimesheets.rows.length === 0) {
-                return res.status(404).send('No timesheets found');
-            }
-            res.status(200).json(userTimesheets);
-
-        } else if (user_id && !start_date && !end_date) {
-            const userTimesheets = await pool.query(
-                'SELECT * FROM weekly_timesheets WHERE user_id = $1',
-                [user_id]
-            )
-            if (userTimesheets.rows.length === 0) {
-                return res.status(404).send('No entries found');
-            }
-            res.status(200).json(userTimesheets.rows);
-            
-        } else if (
-            (!user_id && !start_date && !end_date)
-            || (!user_id &&
-                (start_date && end_date)
-                || (!start_date && end_date)
-                || (start_date && !end_date)
-                )
-            ) {
-            res.status(400).send('Please select a user');
+        const userTimesheets = await pool.query(
+            `SELECT * FROM weekly_timesheets
+                WHERE user_id = $1
+                AND week_start >= $2
+                AND week_end >= $3`,
+            [user_id, start_date, end_date]
+        )
+        const userTimesheetsTotal = await pool.query(
+            `SELECT
+                COUNT(timesheet_id) AS total_timesheets
+                SUM(total_entries) AS total_entries
+                SUM(total_hours) AS total_hours
+            FROM weekly_timesheets
+                WHERE user_id = $1`,
+            [user_id]
+        )
+        if (userTimesheets.rows.length === 0) {
+            return res.status(404).send('No timesheets found');
         }
+        res.status(200).json({
+            userTimesheets: userTimesheets.rows,
+            userTimesheetsTotal: userTimesheetsTotal.rows[0]
+        });
 
     } catch (err) {
         res.status(500).send('Server error');
     }
 })
+
+router.post('/post_project', validate, authorizeToken, async (req, res) => {
+    try {
+        const { status, project_name, details, start_date, due_date } = req.body;
+
+        // Check if project name already exists
+        const findProject = await pool.query(
+            'SELECT * FROM projects WHERE project_name = $1',
+            [project_name]
+        )
+        if (findProject.rows.length !== 0) {
+            return res.status(400).send('Project name already exists');
+        }
+
+        // Create a new project and add to projects table
+        const project = await pool.query(
+            `INSERT INTO projects (status, project_name, details, start_date, due_date)
+                VALUES ($1, $2, $3, $4, $5)
+                RETURNING *`,
+            [status, project_name, details, start_date, due_date]
+        )
+        res.status(200).json({
+            message: 'Create project success',
+            project: project.rows[0]
+        })
+    } catch (err) {
+        res.status(500).send('Server error');
+    }
+})
+
+router.put('/update_project/:project_id', validate, authorizeToken, async (req, res) => {
+    try {
+        const { project_id } = req.params;
+        const { status, project_name, details, start_date, due_date } = req.body;
+
+        const project = await pool.query(
+            `UPDATE projects
+                SET status = $1,
+                    project_name = $2,
+                    details = $3,
+                    start_date = $4,
+                    due_date = $5
+                WHERE project_id = $6
+                RETURNING *`,
+            [status, project_name, details, start_date, due_date, project_id]
+        )
+        res.status(200).json({
+            message: 'Project update success',
+            updatedProject: project.rows[0]
+        })
+    } catch (err) {
+        res.status(500).send('Server error');
+    }
+})
+
+router.post('/post_user_projects', authorizeToken, async (req, res) => {
+    try {
+        const { user_id, project_id } = req.body;
+
+        // Check if user is already assigned to project
+        const findUserProject = await pool.query(
+            `SELECT * FROM user_projects
+                WHERE user_id = $1
+                AND project_id = $2`,
+            [user_id, project_id]
+        )
+        if (findUserProject.rows.length !== 0) {
+            return res.status(400).send('User is already assigned to this project');
+        }
+        // Add project to user_projects table
+        const assignedProject = await pool.query(
+            `INSERT INTO user_projects (user_id, project_id)
+                VALUES ($1, $2)
+                RETURNING *`,
+            [user_id, project_id]
+        )
+        res.status(200).json(assignedProject.rows[0]);
+    } catch (err) {
+        res.status(500).send('Server error');
+    }
+})
+
+router.delete('/delete_user_projects/:user_id/:project_id', authorizeToken, async (req, res) => {
+    try {
+        const { user_id, project_id } = req.params;
+
+        const deleteUserProject = await pool.query(
+            `DELETE FROM user_projects
+                WHERE user_id = $1
+                AND project_id = $2
+            RETURNING *`,
+            [user_id, project_id]
+        )
+        res.status(200).json({
+            message: 'Removed user from project',
+            removedUser: deleteUserProject.rows[0]
+        })
+    } catch (err) {
+        res.status(500).send('Server error');
+    }
+})
+
+// router.put('/update_user/:user_id', validate, authorizeToken, async (req, res) => {
+//     try {
+//         const { user_id } = req.params;
+//         const { first_name, last_name, username, email, isAdmin } = req.body;
+//         let { password } = req.body;
+
+//         const validPassword = await bcrypt.compare(password, user.rows[0].password);
+//         if (!validPassword) {
+//             return res.status(400).send('Username or password is incorrect')
+//         }
+
+//         if (password) {
+//             bcrypt.genSalt(10, (err, salt) => {
+//                 if (err) throw new Error(err);
+//                 bcrypt.hash(password, salt, async (err, hash) => {
+//                     if (err) throw new Error(err);
+//                     password = hash;
+//                 })
+//             })   
+//         }
+
+//         const user = await pool.query(
+//             `UPDATE users
+//                 SET first_name = $1,
+//                     last_name = $2,
+//                     username = $3,
+//                     email = $4,
+//                     password = $5,
+//                     isAdmin = $6
+//                 WHERE user_id = $7`,
+//             [first_name, last_name, username, email, password, isAdmin, user_id]
+//         )
+//         res.status(200).json({
+//             message: 'Update user success',
+//             updatedUser: user.rows[0]
+//         })
+
+//     } catch (err) {
+//         res.status(500).send('Server error');
+//     }
+// })
 
 module.exports = router;

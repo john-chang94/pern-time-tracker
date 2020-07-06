@@ -5,16 +5,16 @@ const authorizeToken = require('../middleware/authorizeToken');
 const { route } = require('./authRoutes');
 
 // Get all projects assigned to the logged in user
-router.get('/projects/:id', authorizeToken, async (req, res) => {
+router.get('/projects/:user_id', authorizeToken, async (req, res) => {
     try {
-        const { id } = req.params;
+        const { user_id } = req.params;
         const projects = await pool.query(
             `SELECT p.project_id, p.status, p.project_name, p.details, p.start_date, p.expected_completion
                 FROM projects AS p
                     JOIN user_projects AS up
                     ON p.project_id = up.project_id
                 WHERE up.user_id = $1`,
-            [id]
+            [user_id]
         )
         if (projects.rows.length === 0) {
             return res.status(404).send('No assigned projects');
@@ -27,14 +27,14 @@ router.get('/projects/:id', authorizeToken, async (req, res) => {
 })
 
 // Get all time entries submitted by the logged in user
-router.get('/entries/:id', authorizeToken, async (req, res) => {
+router.get('/entries/:user_id', authorizeToken, async (req, res) => {
     try {
-        const { id } = req.params;
+        const { user_id } = req.params;
         const entries = await pool.query(
             `SELECT * FROM entries
                 WHERE user_id = $1
                 ORDER BY date DESC`,
-            [id]
+            [user_id]
         )
         if (entries.rows.length === 0) {
             return res.status(404).send('No submitted entries');
@@ -129,14 +129,14 @@ router.delete('/delete_entry/:entry_id', authorizeToken, async (req, res) => {
 })
 
 // Get all timesheets submitted by the logged in user
-router.get('/timesheets/:id', authorizeToken, async (req, res) => {
+router.get('/timesheets/:user_id', authorizeToken, async (req, res) => {
     try {
-        const { id } = req.params;
+        const { user_id } = req.params;
         const timesheets = await pool.query(
             `SELECT * FROM weekly_timesheets
                 WHERE user_id = $1
                 ORDER BY week_start DESC`,
-            [id]
+            [user_id]
         )
         if (timesheets.rows.length === 0) {
             return res.status(404).send('No submitted timesheets');

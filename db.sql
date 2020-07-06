@@ -17,14 +17,14 @@ CREATE TABLE projects (
     project_name VARCHAR(255) NOT NULL,
     details VARCHAR(255) NOT NULL,
     start_date DATE,
-    expected_completion DATE
+    due_date DATE
 );
 
 CREATE TABLE entries (
     entry_id SERIAL PRIMARY KEY,
     user_id uuid NOT NULL,
     project_id INT NOT NULL,
-    date DATE NOT NULL UNIQUE,
+    date DATE NOT NULL,
     hours_worked INT NOT NULL,
     details VARCHAR(255),
     FOREIGN KEY (user_id) REFERENCES users(user_id),
