@@ -1,8 +1,8 @@
 const router = require('express').Router();
 const pool = require('../db');
+const bcrypt = require('bcrypt');
 const validate = require('../middleware/validate');
 const authorizeToken = require('../middleware/authorizeToken');
-const { end } = require('../db');
 
 // Get all time entries
 router.get('/entries', authorizeToken, async (req, res) => {
@@ -68,6 +68,93 @@ router.get('/timesheets', authorizeToken, async (req, res) => {
     }
 })
 
+// Get a specific user
+router.get('/users/:user_id', authorizeToken, async (req, res) => {
+    try {
+        const { user_id } = req.params;
+
+        const user = await pool.query(
+            `SELECT * FROM users WHERE user_id = $1`,
+            [user_id]
+        )
+        if (user.rows.length === 0) {
+            return res.status(404).send('User not found');
+        }
+        res.status(200).json(user.rows[0]);
+
+    } catch (err) {
+        res.status(500).send('Server error');
+    }
+})
+
+// Update user info
+router.put('/users/:user_id', validate, authorizeToken, async (req, res) => {
+    try {
+        const { user_id } = req.params;
+        const { first_name, last_name, username, email, isAdmin } = req.body;
+
+        const user = await pool.query(
+            `UPDATE users
+                SET first_name = $1,
+                    last_name = $2,
+                    username = $3,
+                    email = $4,
+                    isAdmin = $5
+                WHERE user_id = $6`,
+            [first_name, last_name, username, email, isAdmin, user_id]
+        )
+        res.status(200).json({
+            message: 'Update user success',
+            updatedUser: user.rows[0]
+        })
+
+    } catch (err) {
+        res.status(500).send('Server error');
+    }
+})
+
+// Change user's password
+router.put('/users/change-pw/:user_id', authorizeToken, async (req, res) => {
+    try {
+        const { user_id } = req.params;
+        let { password, newPassword } = req.body;
+
+        const user = await pool.query(
+            `SELECT * FROM users WHERE user_id = $1`,
+            [user_id]
+        )
+
+        const validPassword = await bcrypt.compare(password, user.rows[0].password);
+        if (!validPassword) return res.status(400).send('Incorrect password');
+
+        if (validPassword) {
+            bcrypt.genSalt(10, (err, salt) => {
+                if (err) throw new Error(err);
+                bcrypt.hash(newPassword, salt, async (err, hash) => {
+                    if (err) throw new Error(err);
+                    newPassword = hash;
+    
+                    const changedPassUser = await pool.query(
+                        `UPDATE users
+                            SET password = $1
+                            WHERE user_id = $2
+                        RETURNING *`,
+                        [newPassword, user_id]
+                    )
+                    res.status(200).json({
+                        message: 'Password change success',
+                        changedPassUser: changedPassUser.rows[0]
+                    })
+                })
+            })
+        }
+
+    } catch (err) {
+        res.status(500).send('Server error');
+    }
+})
+
+// Get entries for a user between two periods
 router.get('/entries/search', validate, authorizeToken, async (req, res) => {
     try {
         const { user_id, start_date, end_date } = req.query;
@@ -136,7 +223,8 @@ router.get('/timesheets/search', validate, authorizeToken, async (req, res) => {
     }
 })
 
-router.post('/post_project', validate, authorizeToken, async (req, res) => {
+// Post a new project
+router.post('/projects', validate, authorizeToken, async (req, res) => {
     try {
         const { status, project_name, details, start_date, due_date } = req.body;
 
@@ -165,7 +253,7 @@ router.post('/post_project', validate, authorizeToken, async (req, res) => {
     }
 })
 
-router.put('/update_project/:project_id', validate, authorizeToken, async (req, res) => {
+router.put('/projects/:project_id', validate, authorizeToken, async (req, res) => {
     try {
         const { project_id } = req.params;
         const { status, project_name, details, start_date, due_date } = req.body;
@@ -190,7 +278,8 @@ router.put('/update_project/:project_id', validate, authorizeToken, async (req, 
     }
 })
 
-router.post('/post_user_projects', authorizeToken, async (req, res) => {
+// Assign a user to a project
+router.post('/user-projects', authorizeToken, async (req, res) => {
     try {
         const { user_id, project_id } = req.body;
 
@@ -217,7 +306,7 @@ router.post('/post_user_projects', authorizeToken, async (req, res) => {
     }
 })
 
-router.delete('/delete_user_projects/:user_id/:project_id', authorizeToken, async (req, res) => {
+router.delete('/user-projects/:user_id/:project_id', authorizeToken, async (req, res) => {
     try {
         const { user_id, project_id } = req.params;
 
@@ -236,47 +325,5 @@ router.delete('/delete_user_projects/:user_id/:project_id', authorizeToken, asyn
         res.status(500).send('Server error');
     }
 })
-
-// router.put('/update_user/:user_id', validate, authorizeToken, async (req, res) => {
-//     try {
-//         const { user_id } = req.params;
-//         const { first_name, last_name, username, email, isAdmin } = req.body;
-//         let { password } = req.body;
-
-//         const validPassword = await bcrypt.compare(password, user.rows[0].password);
-//         if (!validPassword) {
-//             return res.status(400).send('Username or password is incorrect')
-//         }
-
-//         if (password) {
-//             bcrypt.genSalt(10, (err, salt) => {
-//                 if (err) throw new Error(err);
-//                 bcrypt.hash(password, salt, async (err, hash) => {
-//                     if (err) throw new Error(err);
-//                     password = hash;
-//                 })
-//             })   
-//         }
-
-//         const user = await pool.query(
-//             `UPDATE users
-//                 SET first_name = $1,
-//                     last_name = $2,
-//                     username = $3,
-//                     email = $4,
-//                     password = $5,
-//                     isAdmin = $6
-//                 WHERE user_id = $7`,
-//             [first_name, last_name, username, email, password, isAdmin, user_id]
-//         )
-//         res.status(200).json({
-//             message: 'Update user success',
-//             updatedUser: user.rows[0]
-//         })
-
-//     } catch (err) {
-//         res.status(500).send('Server error');
-//     }
-// })
 
 module.exports = router;

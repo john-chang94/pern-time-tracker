@@ -35,40 +35,40 @@ module.exports = (req, res, next) => {
         if (![username, password].every(Boolean)) {
             return res.status(401).send("Missing Credentials");
         }
-    } else if (req.path === '/post_project') {
-        if (![status].every(Boolean)) {
-            return res.status(400).send('Project status required');
-        }
-        if (![project_name].every(Boolean)) {
-            return res.status(400).send('Project name required');
-        }
-        if (![details].every(Boolean)) {
-            return res.status(400).send('Project details required');
-        }
-    } else if (req.path === "/update_user") {
+    } else if (req.path === "/users") {
         if (![first_name, last_name, username, email, password, isAdmin].every(Boolean)) {
             return res.status(401).send("Missing Credentials");
         } else if (!validEmail(email)) {
             return res.status(401).send("Invalid Email");
         }
-    } else if (req.path === '/post_entry' || req.path === '/update_entry') {
-        if (![project_id].every(Boolean)) {
+    } else if (req.path === '/projects') {
+        if (!status) {
+            return res.status(400).send('Project status required');
+        }
+        if (!project_name) {
+            return res.status(400).send('Project name required');
+        }
+        if (!details) {
+            return res.status(400).send('Project details required');
+        }
+    } else if (req.path === '/entries') {
+        if (!project_id) {
             return res.status(400).send('Project is required');
         }
-        if (![date].every(Boolean)) {
+        if (!date) {
             return res.status(400).send('Date is required');
         }
-        if (![hours_worked].every(Boolean)) {
+        if (!hours_worked) {
             return res.status(400).send('Hours worked required');
         }
     } else if (req.path === '/entries/search' || req.path === '/timesheets/search') {
-        if (![user_id].every(Boolean)) {
+        if (!user_id) {
             return res.status(400).send('Please select a user');
         }
-        if (![start_date].every(Boolean)) {
+        if (!start_date) {
             return res.status(400).send('Start date is required');
         }
-        if (![end_date].every(Boolean)) {
+        if (!end_date) {
             return res.status(400).send('End date is required');
         }
     }

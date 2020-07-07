@@ -2,7 +2,6 @@ const router = require('express').Router();
 const pool = require('../db');
 const validate = require('../middleware/validate');
 const authorizeToken = require('../middleware/authorizeToken');
-const { route } = require('./authRoutes');
 
 // Get all projects assigned to the logged in user
 router.get('/projects/:user_id', authorizeToken, async (req, res) => {
@@ -47,7 +46,7 @@ router.get('/entries/:user_id', authorizeToken, async (req, res) => {
 })
 
 // Post a time entry
-router.post('/post_entry', validate, authorizeToken, async (req, res) => {
+router.post('/entries', validate, authorizeToken, async (req, res) => {
     try {
         const { user_id, project_id, date, hours_worked, details } = req.body;
 
@@ -79,7 +78,7 @@ router.post('/post_entry', validate, authorizeToken, async (req, res) => {
 })
 
 // Update a time entry
-router.put('/update_entry/:entry_id', validate, authorizeToken, async (req, res) => {
+router.put('/entries/:entry_id', validate, authorizeToken, async (req, res) => {
     try {
         const { entry_id } = req.params;
         const { project_id, date, hours_worked, details } = req.body;
@@ -105,7 +104,7 @@ router.put('/update_entry/:entry_id', validate, authorizeToken, async (req, res)
 })
 
 // Delete a time entry
-router.delete('/delete_entry/:entry_id', authorizeToken, async (req, res) => {
+router.delete('/entries/:entry_id', authorizeToken, async (req, res) => {
     try {
         const { entry_id } = req.params;
         const deletedEntry = await pool.query(
@@ -149,7 +148,7 @@ router.get('/timesheets/:user_id', authorizeToken, async (req, res) => {
 })
 
 // Submit a weekly timesheet
-router.post('/post_timesheet', authorizeToken, async (req, res) => {
+router.post('/timesheets', authorizeToken, async (req, res) => {
     try {
         const { user_id, week_start, week_end, total_entries, total_hours } = req.body;
         const timesheet = await pool.query(
