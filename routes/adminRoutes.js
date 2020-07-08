@@ -253,6 +253,7 @@ router.post('/projects', validate, authorizeToken, async (req, res) => {
     }
 })
 
+// Update project info
 router.put('/projects/:project_id', validate, authorizeToken, async (req, res) => {
     try {
         const { project_id } = req.params;
@@ -273,6 +274,29 @@ router.put('/projects/:project_id', validate, authorizeToken, async (req, res) =
             message: 'Project update success',
             updatedProject: project.rows[0]
         })
+    } catch (err) {
+        res.status(500).send('Server error');
+    }
+})
+
+// Get all assigned users for a project
+router.get('/user-projects/:project_id', authorizeToken, async (req, res) => {
+    try {
+        const { project_id } = req.params;
+
+        const projectUsers = await pool.query(
+            `SELECT u.user_id, u.first_name, u.last_name
+                FROM users AS u
+                    JOIN user_projects AS up
+                    ON u.user_id = up.user_id
+                WHERE up.project_id = $1`,
+            [project_id]
+        )
+        if (projectUsers.rows.length === 0) {
+            return res.status(404).send('No assigned users');
+        }
+        res.status(200).json(projectUsers.rows);
+
     } catch (err) {
         res.status(500).send('Server error');
     }
@@ -306,6 +330,7 @@ router.post('/user-projects', authorizeToken, async (req, res) => {
     }
 })
 
+// Remove user from a project
 router.delete('/user-projects/:user_id/:project_id', authorizeToken, async (req, res) => {
     try {
         const { user_id, project_id } = req.params;

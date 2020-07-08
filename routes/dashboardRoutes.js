@@ -8,7 +8,7 @@ router.get('/projects/:user_id', authorizeToken, async (req, res) => {
     try {
         const { user_id } = req.params;
         const projects = await pool.query(
-            `SELECT p.project_id, p.status, p.project_name, p.details, p.start_date, p.expected_completion
+            `SELECT p.project_id, p.status, p.project_name, p.details, p.start_date, p.due_date
                 FROM projects AS p
                     JOIN user_projects AS up
                     ON p.project_id = up.project_id
