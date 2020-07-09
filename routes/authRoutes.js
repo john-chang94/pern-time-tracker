@@ -53,7 +53,7 @@ router.post('/register', validate, async (req, res) => {
     }
 })
 
-router.post('/login', validate, async (req, res) => {
+router.post('/signin', validate, async (req, res) => {
     try {
         const { username, password } = req.body;
 
@@ -75,7 +75,7 @@ router.post('/login', validate, async (req, res) => {
         // Provide token if successful
         const token = jwtGenerator(user.rows[0].user_id);
         res.status(200).json({
-            message: 'Login success',
+            message: 'Sign in success',
             isAdmin: user.rows[0].isAdmin,
             user_id: user.rows[0].user_id,
             token
