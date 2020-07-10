@@ -91,7 +91,7 @@ router.get('/users/:user_id', authorizeToken, async (req, res) => {
 router.put('/users/:user_id', validate, authorizeToken, async (req, res) => {
     try {
         const { user_id } = req.params;
-        const { first_name, last_name, username, email, isAdmin } = req.body;
+        const { first_name, last_name, username, email, is_admin } = req.body;
 
         const user = await pool.query(
             `UPDATE users
@@ -99,9 +99,10 @@ router.put('/users/:user_id', validate, authorizeToken, async (req, res) => {
                     last_name = $2,
                     username = $3,
                     email = $4,
-                    isAdmin = $5
-                WHERE user_id = $6`,
-            [first_name, last_name, username, email, isAdmin, user_id]
+                    is_admin = $5
+                WHERE user_id = $6
+                RETURNING *`,
+            [first_name, last_name, username, email, is_admin, user_id]
         )
         res.status(200).json({
             message: 'Update user success',

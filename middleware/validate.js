@@ -5,7 +5,7 @@ module.exports = (req, res, next) => {
         username,
         email,
         password,
-        isAdmin,
+        is_admin,
         status,
         project_name,
         details,
@@ -26,7 +26,7 @@ module.exports = (req, res, next) => {
     }
 
     if (req.path === "/register") {
-        if (![first_name, last_name, username, email, password, isAdmin].every(Boolean)) {
+        if (![first_name, last_name, username, email, password, is_admin].every(Boolean)) {
             return res.status(401).send("Missing Credentials");
         } else if (!validEmail(email)) {
             return res.status(401).send("Invalid Email");
@@ -35,8 +35,8 @@ module.exports = (req, res, next) => {
         if (![username, password].every(Boolean)) {
             return res.status(401).send("Missing Credentials");
         }
-    } else if (req.path === "/users") {
-        if (![first_name, last_name, username, email, password, isAdmin].every(Boolean)) {
+    } else if (req.path === '/users') {
+        if (![first_name, last_name, username, email, is_admin].every(Boolean)) {
             return res.status(401).send("Missing Credentials");
         } else if (!validEmail(email)) {
             return res.status(401).send("Invalid Email");

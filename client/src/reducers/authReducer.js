@@ -1,5 +1,6 @@
 const iniState = {
-    auth: false,
+    authorized: false,
+    isAdmin: null,
     authError: null
 }
 
@@ -8,7 +9,9 @@ export default (state = iniState, action) => {
         case 'SIGNIN_SUCCESS':
             return {
                 ...state,
-                auth: action.payload
+                authorized: true,
+                isAdmin: action.payload.isAdmin,
+                user: action.payload
             }
         case 'SIGNIN_FAIL':
             return {

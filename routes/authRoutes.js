@@ -5,10 +5,10 @@ const jwtGenerator = require('../util/jwtGenerator');
 const validate = require('../middleware/validate');
 const authorizeToken = require('../middleware/authorizeToken');
 
-router.post('/register', validate, async (req, res) => {
+router.post('/register', async (req, res) => {
     try {
         // Did not take out 'password' because we cannot change a const in the hash
-        const { first_name, last_name, username, email, admin } = req.body;
+        let { first_name, last_name, username, email, password, is_admin } = req.body;
 
         // Check if user exists
         const user = await pool.query(
@@ -23,7 +23,6 @@ router.post('/register', validate, async (req, res) => {
         }
         // Hash new user's password
         if (user.rows.length === 0) {
-            let { password } = req.body;
 
             bcrypt.genSalt(10, (err, salt) => {
                 if (err) throw new Error(err);
@@ -33,10 +32,10 @@ router.post('/register', validate, async (req, res) => {
 
                     // Enter new user into db
                     const newUser = await pool.query(
-                        `INSERT INTO users (first_name, last_name, username, email, password, admin)
+                        `INSERT INTO users (first_name, last_name, username, email, password, is_admin)
                             VALUES ($1, $2, $3, $4, $5, $6)
                             RETURNING *`,
-                        [first_name, last_name, username, email, password, admin]
+                        [first_name, last_name, username, email, password, is_admin]
                     )
                     // Generate jwt token
                     const token = jwtGenerator(newUser.rows[0].user_id);
@@ -76,7 +75,7 @@ router.post('/signin', validate, async (req, res) => {
         const token = jwtGenerator(user.rows[0].user_id);
         res.status(200).json({
             message: 'Sign in success',
-            isAdmin: user.rows[0].isAdmin,
+            isAdmin: user.rows[0].is_admin,
             user_id: user.rows[0].user_id,
             token
         });
