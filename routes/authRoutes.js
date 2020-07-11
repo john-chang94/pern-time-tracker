@@ -1,11 +1,12 @@
 const router = require('express').Router();
 const pool = require('../db');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 const jwtGenerator = require('../util/jwtGenerator');
 const validate = require('../middleware/validate');
 const authorizeToken = require('../middleware/authorizeToken');
 
-router.post('/register', async (req, res) => {
+router.post('/register', validate, async (req, res) => {
     try {
         // Did not take out 'password' because we cannot change a const in the hash
         let { first_name, last_name, username, email, password, is_admin } = req.body;
@@ -85,9 +86,30 @@ router.post('/signin', validate, async (req, res) => {
     }
 })
 
-router.get('/verify', authorizeToken, (req, res) => {
+// Return the user id to the client for init page load
+router.get('/verify/user', authorizeToken, async (req, res) => {
     try {
-        res.status(200).json({ authorized: true });
+        res.status(200).json({ user_id: req.id })
+    } catch (err) {
+        res.send(500).send('Unauthorized');
+    }
+})
+
+router.get('/verify/:user_id', authorizeToken, async (req, res) => {
+    try {
+        const { user_id } = req.params;
+
+        const isAdmin = await pool.query(
+            `SELECT is_admin FROM users
+                WHERE user_id = $1`,
+            [user_id]
+        )
+
+        res.status(200).json({
+            authorized: true,
+            isAdmin: isAdmin.rows[0].is_admin,
+            user_id
+        });
     } catch (err) {
         res.status(500).send('Server error');
     }

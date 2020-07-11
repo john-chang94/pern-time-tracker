@@ -15,13 +15,15 @@ class SignIn extends Component {
         })
     }
 
-    handleSubmit = (e) => {
+    handleSubmit = async (e) => {
         e.preventDefault();
-        this.props.signIn(this.state);
+        await this.props.signIn(this.state);
+        sessionStorage.setItem('token', this.props.user.token)
     }
 
     render() {
         const { authError } = this.props;
+        // Redirect to user home once authorized after sign-in
         if (this.props.authorized) {
             return <Redirect to='/home' />
         }
