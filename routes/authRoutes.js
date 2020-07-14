@@ -76,8 +76,7 @@ router.post('/signin', validate, async (req, res) => {
         const token = jwtGenerator(user.rows[0].user_id);
         res.status(200).json({
             message: 'Sign in success',
-            isAdmin: user.rows[0].is_admin,
-            user_id: user.rows[0].user_id,
+            user: user.rows[0],
             token
         });
 
@@ -99,16 +98,16 @@ router.get('/verify/:user_id', authorizeToken, async (req, res) => {
     try {
         const { user_id } = req.params;
 
-        const isAdmin = await pool.query(
-            `SELECT is_admin FROM users
+        const user = await pool.query(
+            `SELECT user_id, first_name, last_name, username, email, is_admin
+                FROM users
                 WHERE user_id = $1`,
             [user_id]
         )
 
         res.status(200).json({
             authorized: true,
-            isAdmin: isAdmin.rows[0].is_admin,
-            user_id
+            user: user.rows[0]
         });
     } catch (err) {
         res.status(500).send('Server error');

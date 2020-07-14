@@ -1,9 +1,15 @@
 import React from 'react'
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
+import { signOut } from '../actions/authActions';
 
-const Navbar = ({ authorized, isAdmin }) => {
+const Navbar = ({ authorized, isAdmin, user, signOut }) => {
     const logo = authorized ? <Link to={isAdmin ? '/admin-home' : '/home'} >TCube</Link> : <span>TCube</span>
+
+    const logout = () => {
+        sessionStorage.removeItem('token');
+        signOut();
+    }
 
     return (
         <nav className="nav-wrapper grey darken-2">
@@ -12,9 +18,9 @@ const Navbar = ({ authorized, isAdmin }) => {
             </div>
             {
                 authorized ?
-                    <ul>
-                        <li>Welcome, NAME</li>
-                        <li>Sign Out</li>
+                    <ul className="right">
+                        <li style={{ marginRight: '10px' }}>Welcome, {user.first_name}</li>
+                        <li><a href="/" onClick={logout}>Sign Out</a></li>
                     </ul>
                     :
                     null
@@ -27,8 +33,15 @@ const Navbar = ({ authorized, isAdmin }) => {
 const mapStateToProps = state => {
     return {
         authorized: state.auth.authorized,
-        isAdmin: state.auth.isAdmin
+        isAdmin: state.auth.isAdmin,
+        user: state.auth.user
     }
 }
 
-export default connect(mapStateToProps)(Navbar);
+const mapDispatchToProps = dispatch => {
+    return {
+        signOut: () => dispatch(signOut())
+    }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Navbar);

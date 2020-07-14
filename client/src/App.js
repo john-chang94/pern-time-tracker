@@ -1,22 +1,26 @@
 import React, { Component } from 'react';
+import 'materialize-css/dist/css/materialize.min.css';
 import './App.css';
 import { BrowserRouter, Switch, Route, Redirect } from 'react-router-dom';
 import { connect } from 'react-redux';
 import NavBar from './components/Navbar';
 import SignIn from './components/auth/SignIn';
 import UserHome from './components/user/UserHome';
-import AuthIsLoaded from './IsLoaded';
-import { verify, setIsLoading } from './actions/authActions';
+import IsLoaded from './IsLoaded';
+import { verify, setIsLoading, setConfig } from './actions/authActions';
 import axios from 'axios';
 
 class App extends Component {
   componentDidMount() {
     const token = sessionStorage.getItem('token');
     if (token) {
-      // If token exists, get user ID then verify token
       const config = { headers: { 'token': token } }
+      // Set config in state for axios requests
+      this.props.setConfig(config);
+      // Get user ID
       axios.get('/auth/verify/user', config)
         .then(res => {
+          // Verify token and get user info
           this.props.verify(config, res.data.user_id)
         })
     }
@@ -27,13 +31,12 @@ class App extends Component {
   }
 
   render() {
-
     const { isLoading, authorized, isAdmin, children } = this.props;
-    console.log(this.props)
+    // console.log(this.props)
 
     return (
       <BrowserRouter>
-        <AuthIsLoaded isLoading={isLoading} children={children}>
+        <IsLoaded isLoading={isLoading} children={children}>
           <div className="container">
             <NavBar />
             <Switch>
@@ -44,7 +47,7 @@ class App extends Component {
                   <Redirect to='/' />} />
             </Switch>
           </div>
-        </AuthIsLoaded>
+        </IsLoaded>
       </BrowserRouter>
     );
   }
@@ -61,7 +64,8 @@ const mapStateToProps = state => {
 const mapDispatchToProps = dispatch => {
   return {
     setIsLoading: bool => dispatch(setIsLoading(bool)),
-    verify: (token, user_id) => dispatch(verify(token, user_id))
+    verify: (token, user_id) => dispatch(verify(token, user_id)),
+    setConfig: config => dispatch(setConfig(config))
   }
 }
 

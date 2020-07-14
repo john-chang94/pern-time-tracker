@@ -1,8 +1,8 @@
 const iniState = {
     authorized: false,
-    isAdmin: null,
     authError: null,
-    isLoading: true
+    isLoading: true,
+    isAdmin: false
 }
 
 export default (state = iniState, action) => {
@@ -11,13 +11,19 @@ export default (state = iniState, action) => {
             return {
                 ...state,
                 authorized: true,
-                isAdmin: action.payload.isAdmin,
-                user: action.payload
+                user: action.payload.user,
+                isAdmin: action.payload.user.is_admin,
+                token: action.payload.token
             }
         case 'SIGNIN_ERROR':
             return {
                 ...state,
                 authError: action.err
+            }
+        case 'SET_CONFIG':
+            return {
+                ...state,
+                config: action.payload
             }
         case 'SET_IS_LOADING':
             return {
@@ -28,7 +34,8 @@ export default (state = iniState, action) => {
             return {
                 ...state,
                 authorized: action.payload.authorized,
-                isAdmin: action.payload.isAdmin,
+                user: action.payload.user,
+                isAdmin: action.payload.user.is_admin,
                 isLoading: false
             }
         case 'VERIFY_ERROR':
@@ -36,10 +43,14 @@ export default (state = iniState, action) => {
                 ...state,
                 authError: action.err
             }
-        case 'GET_USER_ID_SUCCESS':
+        case 'GET_USER_ID':
             return {
                 ...state,
                 userId: action.payload
+            }
+        case 'SIGN_OUT':
+            return {
+                state
             }
         default:
             return state;

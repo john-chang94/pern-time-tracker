@@ -17,6 +17,13 @@ export const signIn = credentials => {
     }
 }
 
+export const setConfig = config => {
+    return {
+        type: 'SET_CONFIG',
+        payload: config
+    }
+}
+
 export const setIsLoading = bool => {
     return {
         type: 'SET_IS_LOADING',
@@ -26,18 +33,11 @@ export const setIsLoading = bool => {
 
 export const getUserId = token => {
     return async (dispatch) => {
-        try {
-            const res = await axios.get('/auth/verify/user', token)
-            dispatch({
-                type: 'GET_USER_ID_SUCCESS',
-                payload: res.data.user_id
-            })
-        } catch (err) {
-            dispatch({
-                type: 'GET_USER_ID_ERROR',
-                err: err.response
-            })
-        }
+        const res = await axios.get('/auth/verify/user', token)
+        dispatch({
+            type: 'GET_USER_ID',
+            payload: res.data.user_id
+        })
     }
 }
 
@@ -56,5 +56,11 @@ export const verify = (token, user_id) => {
                 err: err.response.data
             })
         }
+    }
+}
+
+export const signOut = () => {
+    return {
+        type: 'SIGN_OUT'
     }
 }
