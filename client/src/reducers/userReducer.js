@@ -1,5 +1,6 @@
 const initState = {
-    userError: null
+    submitError: '',
+    submitSuccess: ''
 }
 
 export default (state = {initState}, action) => {
@@ -13,6 +14,27 @@ export default (state = {initState}, action) => {
             return {
                 ...state,
                 userError: action.err
+            }
+        case 'SUBMIT_ENTRY_SUCCESS':
+            return {
+                ...state,
+                submitSuccess: action.payload.message,
+                submitError: ''
+            }
+        case 'SUBMIT_ENTRY_ERROR':
+            return {
+                ...state,
+                submitError: action.err,
+                submitSuccess: ''
+            }
+        case 'GET_ENTRIES_SUCCESS':
+            return {
+                ...state,
+                entries: action.payload
+            }
+        case 'GET_ENTRIES_ERROR':
+            return {
+                ...state
             }
         default:
             return state

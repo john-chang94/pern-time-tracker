@@ -12,17 +12,19 @@ class SignIn extends Component {
 
     handleChange = e => {
         this.setState({
-            [e.target.name]: e.target.value
+            [e.target.id]: e.target.value
         })
     }
 
     handleSubmit = async (e) => {
         e.preventDefault();
         await this.props.signIn(this.state);
-        const config = { headers: { 'token': this.props.token }}
-        await this.props.setConfig(config);
-        await this.props.getProjects(config, this.props.user.user_id)
-        sessionStorage.setItem('token', this.props.token)
+        if (this.props.token) {
+            const config = { headers: { 'token': this.props.token }}
+            await this.props.setConfig(config);
+            await this.props.getProjects(config, this.props.user.user_id)
+            sessionStorage.setItem('token', this.props.token)
+        }
     }
 
     render() {
@@ -35,11 +37,11 @@ class SignIn extends Component {
             <form style={{ marginTop: '35px' }} onSubmit={this.handleSubmit}>
                 <div className="input-field">
                     <label htmlFor="username">Username</label>
-                    <input type="text" name="username" onChange={this.handleChange} />
+                    <input type="text" id="username" onChange={this.handleChange} />
                 </div>
                 <div className="input-field">
                     <label htmlFor="password">Password</label>
-                    <input type="password" name="password" onChange={this.handleChange} />
+                    <input type="password" id="password" onChange={this.handleChange} />
                 </div>
                 <div className="input-field">
                     <button style={{ display: 'block' }} className="btn blue-grey">Sign In</button>

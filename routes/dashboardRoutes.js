@@ -30,9 +30,12 @@ router.get('/entries/:user_id', authorizeToken, async (req, res) => {
     try {
         const { user_id } = req.params;
         const entries = await pool.query(
-            `SELECT * FROM entries
-                WHERE user_id = $1
-                ORDER BY date DESC`,
+            `SELECT p.project_name, e.date, e.hours_worked, e.details, e.entry_id
+                FROM projects AS p
+                    JOIN entries AS e
+                    ON p.project_id = e.project_id
+                WHERE e.user_id = $1
+                ORDER BY date DESC LIMIT 7`,
             [user_id]
         )
         if (entries.rows.length === 0) {
