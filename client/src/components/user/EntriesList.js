@@ -1,59 +1,28 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux';
 import moment from 'moment';
-import { getEntries } from '../../actions/userActions';
-import EditEntry from './EditEntry';
+import { getEntries, deleteEntry } from '../../actions/userActions';
 
 class EntriesList extends Component {
-    state = {
-        modalOpen: false,
-        entry: '',
-        date: '',
-        hours_worked: '',
-        details: ''
-    }
     componentDidMount() {
-        const { getEntries, config, user } = this.props;
-        getEntries(config, user.user_id)
+        const { getEntries, user } = this.props;
+        if (user) {
+            getEntries(user.user_id)
+        }
     }
 
-    openModal = () => {
-        this.setState({
-            modalOpen: true
-        })
-    }
-
-    closeModal = () => {
-        this.setState({
-            modalOpen: false,
-            entry: '',
-            date: '',
-            hours_worked: '',
-            details: ''
-        })
-    }
-
-    setEntryModal = entry => {
-        this.setState({
-            date: entry.date,
-            hours_worked: entry.hours_worked,
-            details: entry.details
-        })
-    }
-
-    handleChange = e => {
-        this.setState({
-            [e.target.id]: e.target.value
-        })
+    handleDelete = async (entry) => {
+        const { user, deleteEntry, getEntries } = this.props;
+        await deleteEntry(entry.entry_id);
+        getEntries(user.user_id);
     }
 
     render() {
         const { entries } = this.props;
-        const { modalOpen, date, hours_worked, details } = this.state;
         return (
-            <div className="section">
+            <div className="section" style={{ marginBottom: '40px' }}>
                 <h5>Recent entries</h5>
-                <table className="centered highlight">
+                <table className="centered striped responsive-table">
                     <thead>
                         <tr>
                             <th>Project Name</th>
@@ -67,28 +36,18 @@ class EntriesList extends Component {
                         {
                             entries ?
                                 entries.map((entry, index) => (
-                                    <tr key={index}
-                                        style={{ cursor: 'pointer' }}
-                                        onMouseEnter={this.setEntryModal.bind(this, entry)}
-                                        onClick={this.openModal}
-                                    >
+                                    <tr key={index}>
                                         <td>{entry.project_name}</td>
                                         <td>{moment(entry.date).format('L')}</td>
                                         <td>{entry.hours_worked}</td>
                                         <td>{entry.details}</td>
+                                        <td><button className="btn red lighten-1" onClick={this.handleDelete.bind(this, entry)}>X</button></td>
                                     </tr>
                                 )) :
                                 null
                         }
                     </tbody>
                 </table>
-                <EditEntry modalOpen={modalOpen}
-                    closeModal={this.closeModal}
-                    handleChange={this.handleChange}
-                    date={date}
-                    hours_worked={hours_worked}
-                    details={details}
-                />
             </div>
         );
     }
@@ -104,7 +63,8 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => {
     return {
-        getEntries: (config, user_id) => dispatch(getEntries(config, user_id))
+        getEntries: (user_id) => dispatch(getEntries(user_id)),
+        deleteEntry: (entry_id) => dispatch(deleteEntry(entry_id))
     }
 }
 

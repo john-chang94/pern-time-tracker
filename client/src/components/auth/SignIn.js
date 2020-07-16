@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { signIn, setConfig } from '../../actions/authActions';
+import { signIn, setToken } from '../../actions/authActions';
 import { Redirect } from 'react-router-dom';
-import { getProjects } from '../../actions/userActions';
+import { getProjects, getEntries } from '../../actions/userActions';
 
 class SignIn extends Component {
     state = {
@@ -18,11 +18,14 @@ class SignIn extends Component {
 
     handleSubmit = async (e) => {
         e.preventDefault();
-        await this.props.signIn(this.state);
+        const { signIn, setToken, getProjects, getEntries } = this.props;
+        await signIn(this.state);
         if (this.props.token) {
-            const config = { headers: { 'token': this.props.token }}
-            await this.props.setConfig(config);
-            await this.props.getProjects(config, this.props.user.user_id)
+            await setToken(this.props.token);
+            if (this.props.user) {
+                await getProjects(this.props.user.user_id)
+                await getEntries(this.props.user.user_id)
+            }
             sessionStorage.setItem('token', this.props.token)
         }
     }
@@ -66,8 +69,9 @@ const mapStateToProps = state => {
 const mapDispatchToProps = dispatch => {
     return {
         signIn: credentials => dispatch(signIn(credentials)),
-        setConfig: config => dispatch(setConfig(config)),
-        getProjects: (config, user_id) => dispatch(getProjects(config, user_id))
+        setToken: token => dispatch(setToken(token)),
+        getProjects: (token, user_id) => dispatch(getProjects(token, user_id)),
+        getEntries: (token, user_id) => dispatch(getEntries(token, user_id))
     }
 }
 

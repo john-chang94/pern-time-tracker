@@ -17,10 +17,10 @@ export const signIn = credentials => {
     }
 }
 
-export const setConfig = config => {
+export const setToken = token => {
     return {
-        type: 'SET_CONFIG',
-        payload: config
+        type: 'SET_TOKEN',
+        payload: token
     }
 }
 
@@ -31,9 +31,9 @@ export const setIsLoading = bool => {
     }
 }
 
-export const getUserId = token => {
+export const getUserId = () => {
     return async (dispatch) => {
-        const res = await axios.get('/auth/verify/user', token)
+        const res = await axios.get('/auth/verify/user')
         dispatch({
             type: 'GET_USER_ID',
             payload: res.data.user_id
@@ -42,10 +42,10 @@ export const getUserId = token => {
 }
 
 // Verify token and find if isAdmin
-export const verify = (token, user_id) => {
+export const verify = (user_id) => {
     return async (dispatch) => {
         try {
-            const res = await axios.get(`/auth/verify/${user_id}`, token)
+            const res = await axios.get(`/auth/verify/${user_id}`)
             dispatch({
                 type: 'VERIFY_SUCCESS',
                 payload: res.data

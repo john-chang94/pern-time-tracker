@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import M from 'materialize-css';
-import { getProjects, submitEntry } from '../../actions/userActions';
+import { getProjects, submitEntry, getEntries } from '../../actions/userActions';
 
 class NewEntry extends Component {
     state = {
@@ -15,8 +15,10 @@ class NewEntry extends Component {
         let select = document.querySelectorAll('select');
         M.FormSelect.init(select);
 
-        const { config, user } = this.props;
-        this.props.getProjects(config, user.user_id)
+        const { user, getProjects } = this.props;
+        if (user) {
+            getProjects(user.user_id)
+        }
     }
 
     handleChange = e => {
@@ -26,24 +28,31 @@ class NewEntry extends Component {
     }
 
     handleSubmit = async (e) => {
-        e.preventDefault();
-        const entry = {
-            user_id: this.props.user.user_id,
-            ...this.state
-        }
-        await this.props.submitEntry(entry, this.props.config)
-        if (this.props.submitSuccess) {
-            this.setState({
-                project_id: '',
-                date: '',
-                hours_worked: '',
-                details: ''
-            })
+        try {
+            e.preventDefault();
+            const { user, submitEntry, getEntries } = this.props;
+            const entry = {
+                user_id: user.user_id,
+                ...this.state
+            }
+            await submitEntry(entry)
+            // If submit success, clear form and fetch updated entries list
+            if (this.props.submitSuccess) {
+                this.setState({
+                    project_id: '',
+                    date: '',
+                    hours_worked: '',
+                    details: ''
+                })
+                getEntries(user.user_id)
+            }
+        } catch (err) {
+            return console.log(err)
         }
     }
 
     render() {
-        const { projects, submitError, submitSuccess } = this.props;
+        const { projects, submitMessage, submitSuccess } = this.props;
         const { project_id, date, hours_worked, details } = this.state;
         return (
             <div className="section">
@@ -73,15 +82,19 @@ class NewEntry extends Component {
                         <label htmlFor="hours_worked">Hours Worked</label>
                     </div>
                     <div className="input-field">
-                        <textarea className="materialize-textarea" id="details" value={details} onChange={this.handleChange}></textarea>
-                        <label htmlFor="details">Additional details</label>
+                        <textarea id="details"
+                            className="materialize-textarea"
+                            value={details}
+                            maxLength="80"
+                            onChange={this.handleChange}
+                        ></textarea>
+                        <label htmlFor="details">Additional details (Max char: 80)</label>
                     </div>
                     <div className="input-field">
                         <button className="btn">Submit</button>
                     </div>
                 </form>
-                { submitError ? <p className="red-text">{submitError}</p> : null}
-                { submitSuccess ? <p className="blue-text">{submitSuccess}</p> : null}
+                {submitMessage ? <p className={submitSuccess ? "blue-text" : "red-text"}>{submitMessage}</p> : null}
             </div>
         );
     }
@@ -92,15 +105,17 @@ const mapStateToProps = state => {
         config: state.auth.config,
         user: state.auth.user,
         projects: state.user.projects,
-        submitError: state.user.submitError,
-        submitSuccess: state.user.submitSuccess
+        submitMessage: state.user.submitMessage,
+        submitSuccess: state.user.submitSuccess,
+        entries: state.user.entries
     }
 }
 
 const mapDispatchToProps = dispatch => {
     return {
-        getProjects: (token, user_id) => dispatch(getProjects(token, user_id)),
-        submitEntry: (token, entry) => dispatch(submitEntry(token, entry))
+        getProjects: (user_id) => dispatch(getProjects(user_id)),
+        submitEntry: (entry) => dispatch(submitEntry(entry)),
+        getEntries: (user_id) => dispatch(getEntries(user_id))
     }
 }
 

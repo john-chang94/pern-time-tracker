@@ -2,7 +2,8 @@ const iniState = {
     authorized: false,
     authError: null,
     isLoading: true,
-    isAdmin: false
+    isAdmin: false,
+    token: ''
 }
 
 export default (state = iniState, action) => {
@@ -20,10 +21,10 @@ export default (state = iniState, action) => {
                 ...state,
                 authError: action.err
             }
-        case 'SET_CONFIG':
+        case 'SET_TOKEN':
             return {
                 ...state,
-                config: action.payload
+                token: action.payload
             }
         case 'SET_IS_LOADING':
             return {
