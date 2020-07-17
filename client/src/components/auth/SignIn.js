@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { signIn, setToken } from '../../actions/authActions';
 import { Redirect } from 'react-router-dom';
-import { getProjects, getEntries } from '../../actions/userActions';
 
 class SignIn extends Component {
     state = {
@@ -18,14 +17,10 @@ class SignIn extends Component {
 
     handleSubmit = async (e) => {
         e.preventDefault();
-        const { signIn, setToken, getProjects, getEntries } = this.props;
+        const { signIn, setToken } = this.props;
         await signIn(this.state);
         if (this.props.token) {
             await setToken(this.props.token);
-            if (this.props.user) {
-                await getProjects(this.props.user.user_id)
-                await getEntries(this.props.user.user_id)
-            }
             sessionStorage.setItem('token', this.props.token)
         }
     }
@@ -69,9 +64,7 @@ const mapStateToProps = state => {
 const mapDispatchToProps = dispatch => {
     return {
         signIn: credentials => dispatch(signIn(credentials)),
-        setToken: token => dispatch(setToken(token)),
-        getProjects: (token, user_id) => dispatch(getProjects(token, user_id)),
-        getEntries: (token, user_id) => dispatch(getEntries(token, user_id))
+        setToken: token => dispatch(setToken(token))
     }
 }
 

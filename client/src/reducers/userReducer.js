@@ -36,6 +36,15 @@ export default (state = {initState}, action) => {
             return {
                 ...state
             }
+        case 'GET_ENTRIES_FOR_TIMESHEET_SUCCESS':
+            return {
+                ...state,
+                entriesForTimesheet: action.payload
+            }
+        case 'GET_ENTRIES_FOR_TIMESHEET_ERROR':
+            return {
+                ...state
+            }
         case 'DELETE_ENTRY_SUCCESS':
             return {
                 ...state

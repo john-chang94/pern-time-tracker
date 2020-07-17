@@ -26,7 +26,6 @@ CREATE TABLE entries (
     project_id INT NOT NULL,
     date DATE NOT NULL,
     hours_worked INT NOT NULL,
-    details VARCHAR(255),
     FOREIGN KEY (user_id) REFERENCES users(user_id),
     FOREIGN KEY (project_id) REFERENCES projects(project_id)
 );

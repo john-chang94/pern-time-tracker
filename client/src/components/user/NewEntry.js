@@ -1,24 +1,22 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import M from 'materialize-css';
-import { getProjects, submitEntry, getEntries } from '../../actions/userActions';
+import { submitEntry, getEntries } from '../../actions/userActions';
+import moment from 'moment';
 
 class NewEntry extends Component {
     state = {
         project_id: '',
         date: '',
-        hours_worked: '',
-        details: ''
+        hours_worked: ''
     }
 
     componentDidMount() {
-        let select = document.querySelectorAll('select');
+        const select = document.querySelectorAll('select');
         M.FormSelect.init(select);
 
-        const { user, getProjects } = this.props;
-        if (user) {
-            getProjects(user.user_id)
-        }
+        const datepicker = document.querySelectorAll('#date');
+        M.Datepicker.init(datepicker, { disableWeekends: true, onSelect: this.selectDate });
     }
 
     handleChange = e => {
@@ -27,13 +25,22 @@ class NewEntry extends Component {
         })
     }
 
+    selectDate = date => {
+        this.setState({
+            date: moment(date).format('MMM DD, yyyy')
+        })
+    }
+
     handleSubmit = async (e) => {
         try {
             e.preventDefault();
+            const { project_id, date, hours_worked } = this.state;
             const { user, submitEntry, getEntries } = this.props;
             const entry = {
                 user_id: user.user_id,
-                ...this.state
+                project_id,
+                date: moment(date).format('yyyy-MM-DD'),
+                hours_worked
             }
             await submitEntry(entry)
             // If submit success, clear form and fetch updated entries list
@@ -41,8 +48,7 @@ class NewEntry extends Component {
                 this.setState({
                     project_id: '',
                     date: '',
-                    hours_worked: '',
-                    details: ''
+                    hours_worked: ''
                 })
                 getEntries(user.user_id)
             }
@@ -53,7 +59,7 @@ class NewEntry extends Component {
 
     render() {
         const { projects, submitMessage, submitSuccess } = this.props;
-        const { project_id, date, hours_worked, details } = this.state;
+        const { project_id, date, hours_worked } = this.state;
         return (
             <div className="section">
                 <h5>Submit a time entry</h5>
@@ -74,21 +80,12 @@ class NewEntry extends Component {
                         }
                     </select>
                     <div className="input-field" style={{ marginTop: '30px' }}>
-                        <input type="date" id="date" value={date} onChange={this.handleChange} />
+                        <input type="text" className="datepicker" id="date" />
                         <label htmlFor="date">Date</label>
                     </div>
                     <div className="input-field">
                         <input type="text" id="hours_worked" value={hours_worked} onChange={this.handleChange} />
                         <label htmlFor="hours_worked">Hours Worked</label>
-                    </div>
-                    <div className="input-field">
-                        <textarea id="details"
-                            className="materialize-textarea"
-                            value={details}
-                            maxLength="80"
-                            onChange={this.handleChange}
-                        ></textarea>
-                        <label htmlFor="details">Additional details (Max char: 80)</label>
                     </div>
                     <div className="input-field">
                         <button className="btn">Submit</button>
@@ -102,7 +99,6 @@ class NewEntry extends Component {
 
 const mapStateToProps = state => {
     return {
-        config: state.auth.config,
         user: state.auth.user,
         projects: state.user.projects,
         submitMessage: state.user.submitMessage,
@@ -113,7 +109,6 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => {
     return {
-        getProjects: (user_id) => dispatch(getProjects(user_id)),
         submitEntry: (entry) => dispatch(submitEntry(entry)),
         getEntries: (user_id) => dispatch(getEntries(user_id))
     }

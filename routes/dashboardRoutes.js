@@ -8,7 +8,7 @@ router.get('/projects/:user_id', authorizeToken, async (req, res) => {
     try {
         const { user_id } = req.params;
         const projects = await pool.query(
-            `SELECT p.project_id, p.status, p.project_name, p.details, p.start_date, p.due_date
+            `SELECT p.project_id, p.status, p.project_name, p.start_date, p.due_date
                 FROM projects AS p
                     JOIN user_projects AS up
                     ON p.project_id = up.project_id
@@ -30,7 +30,7 @@ router.get('/entries/:user_id', authorizeToken, async (req, res) => {
     try {
         const { user_id } = req.params;
         const entries = await pool.query(
-            `SELECT p.project_name, e.date, e.hours_worked, e.details, e.entry_id
+            `SELECT p.project_name, e.date, e.hours_worked, e.entry_id
                 FROM projects AS p
                     JOIN entries AS e
                     ON p.project_id = e.project_id
@@ -48,10 +48,35 @@ router.get('/entries/:user_id', authorizeToken, async (req, res) => {
     }
 })
 
+// Get all time entries for a weekly timesheet submitted by the logged in user
+router.get('/entries/search', authorizeToken, async (req, res) => {
+    try {
+        const { user_id, start_date, end_date } = req.query;
+        const entries = await pool.query(
+            `SELECT p.project_name, e.date, e.hours_worked, e.entry_id
+                FROM projects AS p
+                    JOIN entries AS e
+                    ON p.project_id = e.project_id
+                WHERE e.user_id = $1
+                    AND date >= $2
+                    AND date <= $3
+                ORDER BY date DESC LIMIT 5`,
+            [user_id, start_date, end_date]
+        )
+        if (entries.rows.length === 0) {
+            return res.status(404).send('No submitted entries');
+        }
+        res.status(200).json(entries.rows);
+
+    } catch (err) {
+        res.status(500).send('Server error');
+    }
+})
+
 // Post a time entry
 router.post('/entries', validate, authorizeToken, async (req, res) => {
     try {
-        const { user_id, project_id, date, hours_worked, details } = req.body;
+        const { user_id, project_id, date, hours_worked } = req.body;
 
         // Check if an entry exists for the same date
         const findEntry = await pool.query(
@@ -61,14 +86,14 @@ router.post('/entries', validate, authorizeToken, async (req, res) => {
             [user_id ,date]
         )
         if (findEntry.rows.length !== 0) {
-            return res.status(400).send('Maximum one time entry per day. Update or remove current entry.');
+            return res.status(400).send('Maximum one time entry per work day. Remove current entry.');
         }
 
         const entry = await pool.query(
-            `INSERT INTO entries (user_id, project_id, date, hours_worked, details)
-                VALUES ($1, $2, $3, $4, $5)
+            `INSERT INTO entries (user_id, project_id, date, hours_worked)
+                VALUES ($1, $2, $3, $4)
                 RETURNING *`,
-            [user_id, project_id, date, hours_worked, details]
+            [user_id, project_id, date, hours_worked]
         )
         res.status(200).json({
             message: 'Submission success',
@@ -84,17 +109,16 @@ router.post('/entries', validate, authorizeToken, async (req, res) => {
 router.put('/entries/:entry_id', validate, authorizeToken, async (req, res) => {
     try {
         const { entry_id } = req.params;
-        const { project_id, date, hours_worked, details } = req.body;
+        const { project_id, date, hours_worked } = req.body;
         const entry = await pool.query(
             `UPDATE entries
                 SET project_id = $1,
                     date = $2,
                     hours_worked = $3,
-                    details = $4
-                WHERE entry_id = $5
-                    AND user_id = $6
+                WHERE entry_id = $4
+                    AND user_id = $5
                 RETURNING *`,
-            [project_id, date, hours_worked, details, entry_id, req.id] // req.id is provided in token creation
+            [project_id, date, hours_worked, entry_id, req.id] // req.id is provided in token creation
         )
         res.status(200).json({
             message: 'Update success',

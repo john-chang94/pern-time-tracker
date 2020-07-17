@@ -51,6 +51,23 @@ export const getEntries = (user_id) => {
     }
 }
 
+export const getEntriesForTimesheet = (user_id, start_date, end_date) => {
+    return async (dispatch) => {
+        try {
+            const res = await axios.get(`/dashboard/entries/search?user_id=${user_id}&start_date=${start_date}&end_date=${end_date}`)
+            dispatch({
+                type: 'GET_ENTRIES_FOR_TIMESHEET_SUCCESS',
+                payload: res.data
+            })
+        } catch (err) {
+            dispatch({
+                type: 'GET_ENTRIES_FOR_TIMESHEET_ERROR',
+                err: err.response.data
+            })
+        }
+    }
+}
+
 export const deleteEntry = (entry_id) => {
     return async (dispatch) => {
         try {
