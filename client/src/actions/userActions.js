@@ -34,10 +34,10 @@ export const submitEntry = (entry) => {
     }
 }
 
-export const getEntries = (user_id) => {
+export const getEntries = (user_id, week_start, week_end) => {
     return async (dispatch) => {
         try {
-            const res = await axios.get(`/dashboard/entries/${user_id}`)
+            const res = await axios.get(`/dashboard/entries/${user_id}/${week_start}/${week_end}`)
             dispatch({
                 type: 'GET_ENTRIES_SUCCESS',
                 payload: res.data
@@ -79,6 +79,23 @@ export const deleteEntry = (entry_id) => {
         } catch (err) {
             dispatch({
                 type: 'DELETE_ENTRY_ERROR',
+                err: err.response.data
+            })
+        }
+    }
+}
+
+export const submitTimesheet = timesheet => {
+    return async (dispatch) => {
+        try {
+            const res = await axios.post('dashboard/timesheets', timesheet)
+            dispatch({
+                type: 'SUBMIT_TIMESHEET_SUCCESS',
+                payload: res.data
+            })
+        } catch (err) {
+            dispatch({
+                type: 'SUBMIT_TIMESHEET_ERROR',
                 err: err.response.data
             })
         }

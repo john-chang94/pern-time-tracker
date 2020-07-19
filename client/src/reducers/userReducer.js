@@ -18,19 +18,20 @@ export default (state = {initState}, action) => {
         case 'SUBMIT_ENTRY_SUCCESS':
             return {
                 ...state,
-                submitMessage: action.payload.message,
-                submitSuccess: true
+                entryMessage: action.payload.message,
+                entrySuccess: true
             }
         case 'SUBMIT_ENTRY_ERROR':
             return {
                 ...state,
-                submitMessage: action.err,
-                submitSuccess: false
+                entryMessage: action.err,
+                entrySuccess: false
             }
         case 'GET_ENTRIES_SUCCESS':
             return {
                 ...state,
-                entries: action.payload
+                entries: action.payload.entries,
+                entriesTotal: action.payload.entriesTotal
             }
         case 'GET_ENTRIES_ERROR':
             return {
@@ -52,6 +53,18 @@ export default (state = {initState}, action) => {
         case 'DELETE_ENTRY_ERROR':
             return {
                 ...state
+            }
+        case 'SUBMIT_TIMESHEET_SUCCESS':
+            return {
+                ...state,
+                timesheetMessage: action.payload.message,
+                timesheetSuccess: true
+            }
+        case 'SUBMIT_TIMESHEET_ERROR':
+            return {
+                ...state,
+                timesheetMessage: action.err,
+                timesheetSuccess: false
             }
         default:
             return state

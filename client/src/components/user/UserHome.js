@@ -3,8 +3,8 @@ import { connect } from 'react-redux';
 import NewEntry from './NewEntry';
 import EntriesList from './EntriesList';
 import axios from 'axios';
+import moment from 'moment';
 import { getProjects, getEntries } from '../../actions/userActions';
-import NewTimesheet from './NewTimesheet';
 
 const UserHome = ({ token, user, getProjects, getEntries }) => {
     if (token) {
@@ -14,16 +14,17 @@ const UserHome = ({ token, user, getProjects, getEntries }) => {
     }
     if (user) {
         getProjects(user.user_id)
-        getEntries(user.user_id)
+        getEntries(
+            user.user_id,
+            moment(new Date(Date.now())).day(1).format('yyyy-MM-DD'), // Monday of current week
+            moment(new Date(Date.now())).day(5).format('yyyy-MM-DD') // Friday of current week
+        )
     }
     return (
         <div>
             <div className="row">
-                <div className="col m6 s12">
+                <div className="col m12">
                     <NewEntry />
-                </div>
-                <div className="col m6 s12">
-                    <NewTimesheet />
                 </div>
             </div>
             <div className="row">
@@ -45,7 +46,7 @@ const mapStateToProps = state => {
 const mapDispatchToProps = dispatch => {
     return {
         getProjects: user_id => dispatch(getProjects(user_id)),
-        getEntries: user_id => dispatch(getEntries(user_id))
+        getEntries: (user_id, week_start, week_end) => dispatch(getEntries(user_id, week_start, week_end))
     }
 }
 

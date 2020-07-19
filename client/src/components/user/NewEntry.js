@@ -58,8 +58,8 @@ class NewEntry extends Component {
     }
 
     render() {
-        const { projects, submitMessage, submitSuccess } = this.props;
-        const { project_id, date, hours_worked } = this.state;
+        const { projects, entryMessage, entrySuccess } = this.props;
+        const { project_id, hours_worked, date } = this.state;
         return (
             <div className="section">
                 <h5>Submit a time entry</h5>
@@ -80,7 +80,7 @@ class NewEntry extends Component {
                         }
                     </select>
                     <div className="input-field" style={{ marginTop: '30px' }}>
-                        <input type="text" className="datepicker" id="date" />
+                        <input type="text" className="datepicker" id="date" defaultValue={date} />
                         <label htmlFor="date">Date</label>
                     </div>
                     <div className="input-field">
@@ -91,7 +91,7 @@ class NewEntry extends Component {
                         <button className="btn">Submit</button>
                     </div>
                 </form>
-                {submitMessage ? <p className={submitSuccess ? "blue-text" : "red-text"}>{submitMessage}</p> : null}
+                {entryMessage ? <p className={entrySuccess ? "blue-text" : "red-text"}>{entryMessage}</p> : null}
             </div>
         );
     }
@@ -101,8 +101,8 @@ const mapStateToProps = state => {
     return {
         user: state.auth.user,
         projects: state.user.projects,
-        submitMessage: state.user.submitMessage,
-        submitSuccess: state.user.submitSuccess,
+        entryMessage: state.user.entryMessage,
+        entrySuccess: state.user.entrySuccess,
         entries: state.user.entries
     }
 }

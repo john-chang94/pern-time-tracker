@@ -25,23 +25,36 @@ router.get('/projects/:user_id', authorizeToken, async (req, res) => {
     }
 })
 
-// Get all time entries submitted by the logged in user
-router.get('/entries/:user_id', authorizeToken, async (req, res) => {
+// Get time entries submitted by the logged in user
+router.get('/entries/:user_id/:week_start/:week_end', authorizeToken, async (req, res) => {
     try {
-        const { user_id } = req.params;
+        const { user_id, week_start, week_end } = req.params;
+        // Get entries for the current week
         const entries = await pool.query(
             `SELECT p.project_name, e.date, e.hours_worked, e.entry_id
                 FROM projects AS p
                     JOIN entries AS e
                     ON p.project_id = e.project_id
                 WHERE e.user_id = $1
-                ORDER BY date DESC LIMIT 7`,
-            [user_id]
+                AND e.date BETWEEN $2 AND $3
+                ORDER BY date DESC LIMIT 5`,
+            [user_id, week_start, week_end]
+        )
+        // Get aggregated for current week
+        const entriesTotal = await pool.query(
+            `SELECT COUNT(date) AS total_entries, SUM(hours_worked) AS total_hours
+                FROM entries
+                WHERE user_id = $1
+                AND date BETWEEN $2 AND $3`,
+            [user_id, week_start, week_end]
         )
         if (entries.rows.length === 0) {
             return res.status(404).send('No submitted entries');
         }
-        res.status(200).json(entries.rows);
+        res.status(200).json({
+            entries: entries.rows,
+            entriesTotal: entriesTotal.rows[0]
+        });
 
     } catch (err) {
         res.status(500).send('Server error');
@@ -178,6 +191,17 @@ router.get('/timesheets/:user_id', authorizeToken, async (req, res) => {
 router.post('/timesheets', authorizeToken, async (req, res) => {
     try {
         const { user_id, week_start, week_end, total_entries, total_hours } = req.body;
+
+        const findTimesheet = await pool.query(
+            `SELECT * FROM weekly_timesheets
+                WHERE user_id = $1
+                AND week_start = $2`,
+            [user_id, week_start]
+        )
+        if (findTimesheet.rows.length !== 0) {
+            return res.status(400).send('You already submitted your timesheet for this week');
+        } 
+
         const timesheet = await pool.query(
             `INSERT INTO weekly_timesheets (user_id, week_start, week_end, total_entries, total_hours)
                 VALUES ($1, $2, $3, $4, $5)
