@@ -28,7 +28,8 @@ class EntriesList extends Component {
     }
 
     render() {
-        const { entries, timesheetMessage, timesheetSuccess } = this.props;
+        const { entries, timesheetMessage, timesheetSuccess, userError } = this.props;
+        const isFriday = moment().day(5).days() !== moment().days() // If current day is not Friday, disable submit timesheet
         return (
             <div style={{ marginBottom: '40px' }}>
                 <h5>This week's entries</h5>
@@ -57,8 +58,9 @@ class EntriesList extends Component {
                         }
                     </tbody>
                 </table>
+                { userError && <p className="center section">{userError}</p> }
                 <div className="section">
-                    <button className="btn blue-grey darken-1" onClick={this.handleSubmit}>Submit timesheet</button>
+                    <button className="btn blue-grey darken-1" disabled={isFriday} onClick={this.handleSubmit}>Submit timesheet</button>
                 </div>
                 {timesheetMessage ? <p className={timesheetSuccess ? "blue-text" : "red-text"}>{timesheetMessage}</p> : null}
             </div>
@@ -72,7 +74,8 @@ const mapStateToProps = state => {
         entries: state.user.entries,
         entriesTotal: state.user.entriesTotal,
         timesheetMessage: state.user.timesheetMessage,
-        timesheetSuccess: state.user.timesheetSuccess
+        timesheetSuccess: state.user.timesheetSuccess,
+        userError: state.user.userError
     }
 }
 

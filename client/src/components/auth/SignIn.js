@@ -26,9 +26,9 @@ class SignIn extends Component {
     }
 
     render() {
-        const { authError } = this.props;
+        const { authError, authorized } = this.props;
         // Redirect to user home once authorized after sign-in
-        if (this.props.authorized) {
+        if (authorized) {
             return <Redirect to='/home' />
         }
         return (

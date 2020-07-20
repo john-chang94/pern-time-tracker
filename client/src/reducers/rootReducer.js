@@ -1,16 +1,12 @@
 import { combineReducers } from 'redux';
 import authReducer from './authReducer';
-import entryReducer from './entryReducer';
 import userReducer from './userReducer';
-import timesheetReducer from './timesheetReducer';
-import projectReducer from './projectReducer';
+import adminReducer from './adminReducer';
 
 const rootReducer = combineReducers({
     auth: authReducer,
-    entry: entryReducer,
     user: userReducer,
-    timesheet: timesheetReducer,
-    project: projectReducer
+    admin: adminReducer
 });
 
 export default rootReducer;

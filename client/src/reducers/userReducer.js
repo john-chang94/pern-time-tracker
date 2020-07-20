@@ -1,9 +1,14 @@
 const initState = {
+    entries: '',
+    projects: '',
     submitMessage: '',
-    submitSuccess: false
+    submitSuccess: false,
+    timesheetMessage: '',
+    timesheetSuccess: false,
+    userError: ''
 }
 
-export default (state = {initState}, action) => {
+export default (state = initState, action) => {
     switch(action.type) {
         case 'GET_PROJECTS_SUCCESS':
             return {
@@ -35,7 +40,8 @@ export default (state = {initState}, action) => {
             }
         case 'GET_ENTRIES_ERROR':
             return {
-                ...state
+                ...state,
+                userError: action.err
             }
         case 'GET_ENTRIES_FOR_TIMESHEET_SUCCESS':
             return {

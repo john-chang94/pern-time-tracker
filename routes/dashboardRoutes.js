@@ -49,7 +49,7 @@ router.get('/entries/:user_id/:week_start/:week_end', authorizeToken, async (req
             [user_id, week_start, week_end]
         )
         if (entries.rows.length === 0) {
-            return res.status(404).send('No submitted entries');
+            return res.status(404).send('No submitted entries for this work week');
         }
         res.status(200).json({
             entries: entries.rows,
