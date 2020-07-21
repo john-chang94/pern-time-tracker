@@ -12,9 +12,6 @@ class NewEntry extends Component {
     }
 
     componentDidMount() {
-        const select = document.querySelectorAll('select');
-        M.FormSelect.init(select);
-
         const datepicker = document.querySelectorAll('#date');
         M.Datepicker.init(datepicker, { disableWeekends: true, onSelect: this.selectDate });
     }

@@ -29,7 +29,7 @@ class EntriesList extends Component {
 
     render() {
         const { entries, timesheetMessage, timesheetSuccess, userError } = this.props;
-        const isFriday = moment().day(5).days() !== moment().days() // If current day is not Friday, disable submit timesheet
+        const isFriday = moment().days() !== moment().day(5).days() // If current day is not Friday, disable submit timesheet
         return (
             <div style={{ marginBottom: '40px' }}>
                 <h5>This week's entries</h5>

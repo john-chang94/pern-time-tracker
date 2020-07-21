@@ -12,6 +12,7 @@ import AdminSignIn from './components/auth/AdminSignIn';
 
 import { verify, setIsLoading, setToken } from './actions/authActions';
 import AdminHome from './components/admin/AdminHome';
+import AdminTimesheets from './components/admin/AdminTimsheets';
 
 class App extends Component {
   componentDidMount() {
@@ -53,9 +54,13 @@ class App extends Component {
                   <UserHome {...props} /> :
                   <Redirect to='/' />} />
               <Route exact path='/admin' component={AdminSignIn} />
-              <Route exact path='/admin-home' render={props =>
+              <Route exact path='/admin/home' render={props =>
                 authorized && isAdmin ?
                   <AdminHome {...props} /> :
+                  <Redirect to='/admin' />} />
+              <Route exact path='/admin/timesheets' render={props =>
+                authorized && isAdmin ?
+                  <AdminTimesheets {...props} /> :
                   <Redirect to='/admin' />} />
             </Switch>
           </div>

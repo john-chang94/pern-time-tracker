@@ -28,7 +28,7 @@ class AdminSignIn extends Component {
     render() { 
         const { authError, authorized, user } = this.props;
         if (authorized && user.is_admin) {
-            return <Redirect to='/admin-home' />
+            return <Redirect to='/admin/home' />
         }
         return ( 
             <form style={{ marginTop: '35px' }} onSubmit={this.handleSubmit}>

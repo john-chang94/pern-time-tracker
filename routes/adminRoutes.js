@@ -36,11 +36,14 @@ router.get('/projects', authorizeToken, async (req, res) => {
     }
 })
 
-// Get all users
+// Get all users by last name
 router.get('/users', authorizeToken, async (req, res) => {
     try {
         const users = await pool.query(
-            'SELECT * FROM users'
+            `SELECT * FROM users
+                WHERE is_admin = $1
+                ORDER BY last_name ASC`,
+            [false]
         )
         if (users.rows.length === 0) {
             return res.status(404).send('No registered users');
@@ -191,25 +194,25 @@ router.get('/entries/search', validate, authorizeToken, async (req, res) => {
     }
 })
 
-router.get('/timesheets/search', validate, authorizeToken, async (req, res) => {
+router.get('/timesheets/:user_id/:start_date/:end_date', validate, authorizeToken, async (req, res) => {
     try {
-        const { user_id, start_date, end_date } = req.query;
+        const { user_id, start_date, end_date } = req.params;
 
         const userTimesheets = await pool.query(
             `SELECT * FROM weekly_timesheets
                 WHERE user_id = $1
-                AND week_start >= $2
-                AND week_end >= $3`,
+                AND week_start BETWEEN $2 AND $3`,
             [user_id, start_date, end_date]
         )
         const userTimesheetsTotal = await pool.query(
             `SELECT
-                COUNT(timesheet_id) AS total_timesheets
-                SUM(total_entries) AS total_entries
+                COUNT(timesheet_id) AS total_timesheets,
+                SUM(total_entries) AS total_entries,
                 SUM(total_hours) AS total_hours
             FROM weekly_timesheets
-                WHERE user_id = $1`,
-            [user_id]
+                WHERE user_id = $1
+                AND week_start BETWEEN $2 AND $3`,
+            [user_id, start_date, end_date]
         )
         if (userTimesheets.rows.length === 0) {
             return res.status(404).send('No timesheets found');

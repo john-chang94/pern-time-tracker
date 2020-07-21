@@ -3,7 +3,8 @@ const iniState = {
     authError: null,
     isLoading: true,
     isAdmin: false,
-    token: ''
+    token: '',
+    user: null
 }
 
 export default (state = iniState, action) => {

@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { signOut } from '../actions/authActions';
 
 const Navbar = ({ authorized, isAdmin, user, signOut }) => {
-    const logo = authorized ? <Link to={isAdmin ? '/admin-home' : '/home'} >TCube</Link> : <span>TCube</span>
+    const logo = authorized ? <Link to={isAdmin ? '/admin/home' : '/home'} >TCube</Link> : <span>TCube</span>
 
     const logout = () => {
         sessionStorage.removeItem('token');
