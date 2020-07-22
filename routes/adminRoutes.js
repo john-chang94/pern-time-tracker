@@ -201,7 +201,8 @@ router.get('/timesheets/:user_id/:start_date/:end_date', validate, authorizeToke
         const userTimesheets = await pool.query(
             `SELECT * FROM weekly_timesheets
                 WHERE user_id = $1
-                AND week_start BETWEEN $2 AND $3`,
+                AND week_start BETWEEN $2 AND $3
+                ORDER BY week_start DESC`,
             [user_id, start_date, end_date]
         )
         const userTimesheetsTotal = await pool.query(

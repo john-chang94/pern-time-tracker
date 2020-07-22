@@ -29,6 +29,15 @@ export default (state = iniState, action) => {
                 ...state,
                 adminError: action.err
             }
+        case 'REGISTER_SUCCESS':
+            return {
+                ...state
+            }
+        case 'REGISTER_ERROR':
+            return {
+                ...state,
+                adminError: action.err
+            }
         default:
             return state
     }

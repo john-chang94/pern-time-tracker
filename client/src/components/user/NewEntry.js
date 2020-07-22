@@ -47,7 +47,11 @@ class NewEntry extends Component {
                     date: '',
                     hours_worked: ''
                 })
-                getEntries(user.user_id)
+                getEntries(
+                    user.user_id,
+                    moment(new Date(Date.now())).day(1).format('yyyy-MM-DD'),
+                    moment(new Date(Date.now())).day(5).format('yyyy-MM-DD')
+                )
             }
         } catch (err) {
             return console.log(err)

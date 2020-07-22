@@ -4,7 +4,7 @@ import { getTimesheets, getUsers } from '../../actions/adminActions';
 import M from 'materialize-css';
 import moment from 'moment';
 
-class AdminTimesheets extends Component {
+class Timesheets extends Component {
     state = {
         user_id: '',
         start_date: '',
@@ -103,12 +103,11 @@ class AdminTimesheets extends Component {
                                 ))
                             }
                             {
-                                // THIS WILL NOT SHOW
                                 timesheetsTotal ?
                                     <tr>
-                                        <td>{timesheetsTotal.total_timesheets}</td>
-                                        <td>{timesheetsTotal.total_entries}</td>
-                                        <td>{timesheetsTotal.total_hours}</td>
+                                        <td style={{ fontWeight: 'bold' }}>{timesheetsTotal.total_timesheets} week(s)</td>
+                                        <td style={{ fontWeight: 'bold' }}>{timesheetsTotal.total_entries}</td>
+                                        <td style={{ fontWeight: 'bold' }}>{timesheetsTotal.total_hours}</td>
                                     </tr> :
                                     null
                             }
@@ -125,7 +124,7 @@ const mapStateToProps = state => {
         user: state.auth.user,
         users: state.admin.users,
         timesheets: state.admin.timesheets,
-        timsheetsTotal: state.admin.timesheetsTotal
+        timesheetsTotal: state.admin.timesheetsTotal
     }
 }
 
@@ -136,4 +135,4 @@ const mapDispatchToProps = dispatch => {
     }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(AdminTimesheets);
+export default connect(mapStateToProps, mapDispatchToProps)(Timesheets);

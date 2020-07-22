@@ -9,7 +9,11 @@ class EntriesList extends Component {
         const { user, deleteEntry, getEntries } = this.props;
         if (window.confirm('Are you sure you want to delete?')) {
             await deleteEntry(entry.entry_id);
-            getEntries(user.user_id);
+            getEntries(
+                user.user_id,
+                moment(new Date(Date.now())).day(1).format('yyyy-MM-DD'),
+                moment(new Date(Date.now())).day(5).format('yyyy-MM-DD')
+            );
         }
     }
 
@@ -58,7 +62,7 @@ class EntriesList extends Component {
                         }
                     </tbody>
                 </table>
-                { userError && <p className="center section">{userError}</p> }
+                {userError && <p className="center section">{userError}</p>}
                 <div className="section">
                     <button className="btn blue-grey darken-1" disabled={isFriday} onClick={this.handleSubmit}>Submit timesheet</button>
                 </div>

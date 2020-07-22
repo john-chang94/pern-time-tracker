@@ -2,9 +2,8 @@ import React from 'react'
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import { getUsers } from '../../actions/adminActions';
 
-const AdminHome = ({ token, getUsers }) => {
+const AdminHome = ({ token }) => {
     if (token) {
         // Set global headers for axios once token is in store
         const tokenConfig = { 'token': token }
@@ -63,10 +62,4 @@ const mapStateToProps = state => {
     }
 }
 
-const mapDispatchToProps = dispatch => {
-    return {
-        getUsers: () => dispatch(getUsers())
-    }
-}
-
-export default connect(mapStateToProps, mapDispatchToProps)(AdminHome);
+export default connect(mapStateToProps)(AdminHome);
