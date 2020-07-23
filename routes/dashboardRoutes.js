@@ -108,7 +108,7 @@ router.post('/entries', validate, authorizeToken, async (req, res) => {
                 RETURNING *`,
             [user_id, project_id, date, hours_worked]
         )
-        res.status(200).json({
+        res.status(201).json({
             message: 'Submission success',
             entry: entry.rows[0]
         });
@@ -208,7 +208,7 @@ router.post('/timesheets', authorizeToken, async (req, res) => {
                 RETURNING *`,
             [user_id, week_start, week_end, total_entries, total_hours]
         )
-        res.status(200).json({
+        res.status(201).json({
             message: 'Submit success',
             timesheet: timesheet.rows[0]
         });

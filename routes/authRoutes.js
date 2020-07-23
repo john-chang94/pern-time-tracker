@@ -8,7 +8,6 @@ const authorizeToken = require('../middleware/authorizeToken');
 
 router.post('/register', validate, async (req, res) => {
     try {
-        // Did not take out 'password' because we cannot change a const in the hash
         let { first_name, last_name, username, email, password, is_admin } = req.body;
 
         // Check if user exists
@@ -40,7 +39,7 @@ router.post('/register', validate, async (req, res) => {
                     )
                     // Generate jwt token
                     const token = jwtGenerator(newUser.rows[0].user_id);
-                    res.status(200).json({
+                    res.status(201).json({
                         message: 'Register success',
                         token
                     });

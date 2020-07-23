@@ -5,7 +5,6 @@ module.exports = (req, res, next) => {
         username,
         email,
         password,
-        is_admin,
         status,
         project_name,
         details,
@@ -26,7 +25,7 @@ module.exports = (req, res, next) => {
     }
 
     if (req.path === "/register") {
-        if (![first_name, last_name, username, email, password, is_admin].every(Boolean)) {
+        if (![first_name, last_name, username, email, password].every(Boolean)) {
             return res.status(401).send("Missing Credentials");
         } else if (!validEmail(email)) {
             return res.status(401).send("Invalid Email");

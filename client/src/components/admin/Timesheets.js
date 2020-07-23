@@ -1,8 +1,13 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux';
-import { getTimesheets, getUsers } from '../../actions/adminActions';
+import { getTimesheets, getUsers, getTimesheetEntries } from '../../actions/adminActions';
 import M from 'materialize-css';
 import moment from 'moment';
+
+const styles = {
+    fontWeight: 'bold',
+    padding: '0'
+}
 
 class Timesheets extends Component {
     state = {
@@ -12,12 +17,14 @@ class Timesheets extends Component {
     }
 
     componentDidMount() {
-        this.props.getUsers();
+        this.props.getUsers(false);
 
         const weekStart = document.querySelectorAll('#start_date');
         M.Datepicker.init(weekStart, { disableDayFn: this.disableDates, onSelect: this.selectWeekStart });
         const weekEnd = document.querySelectorAll('#end_date');
         M.Datepicker.init(weekEnd, { disableDayFn: this.disableDates, onSelect: this.selectWeekEnd });
+        const data = document.querySelectorAll('.collapsible');
+        M.Collapsible.init(data);
     }
 
     handleChange = e => {
@@ -34,6 +41,14 @@ class Timesheets extends Component {
             moment(start_date).format('yyyy-MM-DD'),
             moment(end_date).format('yyyy-MM-DD')
         );
+    }
+
+    getEachEntry = (timesheet) => {
+        this.props.getTimesheetEntries(
+            this.state.user_id,
+            moment(timesheet.week_start).format('yyyy-MM-DD'),
+            moment(timesheet.week_end).format('yyyy-MM-DD')
+        )
     }
 
     selectWeekStart = date => {
@@ -55,8 +70,7 @@ class Timesheets extends Component {
     }
 
     render() {
-        console.log(this.props)
-        const { users, user_id, timesheets, timesheetsTotal } = this.props;
+        const { users, user_id, timesheets, timesheetsTotal, timesheetEntries } = this.props;
         const { start_date, end_date } = this.state;
         return (
             <div className="section">
@@ -84,35 +98,58 @@ class Timesheets extends Component {
                 </form>
 
                 <div className="section">
-                    <table className="centered">
-                        <thead>
-                            <tr>
-                                <th>Work Week</th>
-                                <th>Total Entries</th>
-                                <th>Total Hours</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {
-                                timesheets && timesheets.map((timesheet, index) => (
-                                <tr key={index}>
-                                    <td>{moment(timesheet.week_start).format('MM/DD/yyyy')} - {moment(timesheet.week_end).format('MM/DD/yyyy')}</td>
-                                    <td>{timesheet.total_entries}</td>
-                                    <td>{timesheet.total_hours}</td>
-                                </tr>
-                                ))
-                            }
-                            {
-                                timesheetsTotal ?
-                                    <tr>
-                                        <td style={{ fontWeight: 'bold' }}>{timesheetsTotal.total_timesheets} week(s)</td>
-                                        <td style={{ fontWeight: 'bold' }}>{timesheetsTotal.total_entries}</td>
-                                        <td style={{ fontWeight: 'bold' }}>{timesheetsTotal.total_hours}</td>
-                                    </tr> :
-                                    null
-                            }
-                        </tbody>
-                    </table>
+                    <div className="row" style={styles}>
+                        <p className="col s4 center">Work Week</p>
+                        <p className="col s4 center">Total Entries</p>
+                        <p className="col s4 center">Total Hours</p>
+                    </div>
+
+                    <hr style={{ margin: '0', padding: '0' }} />
+
+                    <ul className="collapsible">
+                        {
+                            // Load each timesheet
+                            timesheets && timesheets.map((timesheet, index) => (
+                                <li key={index} style={{ padding: '0' }} onClick={this.getEachEntry.bind(this, timesheet)}>
+                                    <div className="collapsible-header row" style={styles}>
+                                        <p className="col s4 center">{moment(timesheet.week_start).format('MM/DD/yyyy')} - {moment(timesheet.week_end).format('MM/DD/yyyy')}</p>
+                                        <p className="col s4 center">{timesheet.total_entries}</p>
+                                        <p className="col s4 center">{timesheet.total_hours}</p>
+                                    </div>
+                                    <div className="collapsible-body" style={{ padding: '0' }}>
+                                        <table className="centered">
+                                            <thead>
+                                                <tr>
+                                                    <th>Date</th>
+                                                    <th>Hours</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {
+                                                    // Load each entry for each timesheet
+                                                    timesheetEntries && timesheetEntries.map((entry, index) => (
+                                                        <tr key={index}>
+                                                            <td>{entry.date}</td>
+                                                            <td>{entry.hours_worked}</td>
+                                                        </tr>
+                                                    ))
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </li>
+                            ))
+                        }
+                    </ul>
+                    {
+                        timesheetsTotal ?
+                            <div className="row">
+                                <p className="col s4 center" style={styles}>{timesheetsTotal.total_timesheets} week(s)</p>
+                                <p className="col s4 center" style={styles}>{timesheetsTotal.total_entries}</p>
+                                <p className="col s4 center" style={styles}>{timesheetsTotal.total_hours}</p>
+                            </div> :
+                            null
+                    }
                 </div>
             </div>
         );
@@ -124,14 +161,16 @@ const mapStateToProps = state => {
         user: state.auth.user,
         users: state.admin.users,
         timesheets: state.admin.timesheets,
-        timesheetsTotal: state.admin.timesheetsTotal
+        timesheetsTotal: state.admin.timesheetsTotal,
+        timesheetEntries: state.admin.timesheetEntries
     }
 }
 
 const mapDispatchToProps = dispatch => {
     return {
         getTimesheets: (user_id, start_date, end_date) => dispatch(getTimesheets(user_id, start_date, end_date)),
-        getUsers: () => dispatch(getUsers())
+        getUsers: (is_admin) => dispatch(getUsers(is_admin)),
+        getTimesheetEntries: (user_id, week_start, week_end) => dispatch(getTimesheetEntries(user_id, week_start, week_end))
     }
 }
 

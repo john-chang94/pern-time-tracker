@@ -9,7 +9,7 @@ class RegisterUser extends Component {
         username: '',
         email: '',
         password: '',
-        is_admin: '',
+        is_admin: false,
         showPassword: false
     }
 
@@ -25,7 +25,6 @@ class RegisterUser extends Component {
         }
     }
 
-    // POST REQ IS RETURNING 401 JSKALDJFLJASLDFJJSKLADFJL
     handleSubmit = e => {
         e.preventDefault();
         const user = {
@@ -42,39 +41,38 @@ class RegisterUser extends Component {
     }
 
     render() {
-        const { showPassword } = this.state;
-        const { adminError } = this.props;
-        console.log(adminError)
+        const { showPassword, is_admin } = this.state;
+        const { adminMessage } = this.props;
         return (
             <div>
                 <h5>Register new user</h5>
-                <form className="section" onSubmit={this.handleSubmit}>
+                <form className="section">
                     <div className="input-field">
                         <p>
                             <label>
-                                <input type="checkbox" className="filled-in" id="is_admin" onChange={this.handleChange} />
+                                <input type="checkbox" className="filled-in" checked={is_admin} id="is_admin" onChange={this.handleChange} />
                                 <span>Admin?</span>
                             </label>
                         </p>
                     </div>
                     <div className="input-field">
-                        <input type="text" id="first_name" />
+                        <input type="text" id="first_name" onChange={this.handleChange} />
                         <label htmlFor="first_name">First Name</label>
                     </div>
                     <div className="input-field">
-                        <input type="text" id="last_name" />
+                        <input type="text" id="last_name" onChange={this.handleChange} />
                         <label htmlFor="last_name">Last Name</label>
                     </div>
                     <div className="input-field">
-                        <input type="text" id="username" />
+                        <input type="text" id="username" onChange={this.handleChange} />
                         <label htmlFor="username">Username</label>
                     </div>
                     <div className="input-field">
-                        <input type="email" id="email" />
+                        <input type="email" id="email" onChange={this.handleChange} />
                         <label htmlFor="email">Email</label>
                     </div>
                     <div className="input-field">
-                        <input type={showPassword ? "text" : "password"} id="password" />
+                        <input type={showPassword ? "text" : "password"} id="password" onChange={this.handleChange} />
                         <label htmlFor="password">Password</label>
                     </div>
                     <div className="input-field">
@@ -86,10 +84,10 @@ class RegisterUser extends Component {
                         </p>
                     </div>
                     <div className="input-field">
-                        <button className="btn">Register</button>
+                        <button className="btn" onClick={this.handleSubmit}>Register</button>
                     </div>
+                    {adminMessage ? <p className={"red-text"}>{adminMessage}</p> : null}
                 </form>
-                {adminError ? <p className={"red-text"}>{adminError}</p> : null}
             </div>
         );
     }
@@ -97,7 +95,7 @@ class RegisterUser extends Component {
 
 const mapStateToProps = state => {
     return {
-        adminError: state.admin.adminErr
+        adminMessage: state.admin.adminMessage
     }
 }
 

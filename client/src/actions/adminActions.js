@@ -17,11 +17,45 @@ export const getTimesheets = (user_id, start_date, end_date) => {
     }
 }
 
-export const getUsers = () => {
+export const getTimesheetEntries = (user_id, week_start, week_end) => {
+    return async (dispatch) => {
+        try {
+            const res = await axios.get(`/admin/entries/${user_id}/${week_start}/${week_end}`)
+            console.log(res.data)
+            dispatch({
+                type: 'GET_TIMESHEET_ENTRIES_SUCCESS',
+                payload: res.data.entries
+            })
+        } catch (err) {
+            dispatch({
+                type: 'GET_TIMESHEET_ENTRIES_ERROR',
+                err: err.response.data
+            })
+        }
+    }
+}
+
+export const getUsers = (is_admin) => {
+    return async (dispatch) => {
+        try {
+            const res = await axios.get(`/admin/users?is_admin=${is_admin}`)
+            dispatch({
+                type: 'GET_USERS_SUCCESS',
+                payload: res.data
+            })
+        } catch (err) {
+            dispatch({
+                type: 'GET_USERS_ERROR',
+                err: err.response.data
+            })
+        }
+    }
+}
+
+export const getAllUsers = () => {
     return async (dispatch) => {
         try {
             const res = await axios.get('/admin/users')
-            console.log(res)
             dispatch({
                 type: 'GET_USERS_SUCCESS',
                 payload: res.data
@@ -39,7 +73,6 @@ export const register = user => {
     return async (dispatch) => {
         try {
             const res = await axios.post('/auth/register', user);
-            console.log(res)
             dispatch({
                 type: 'REGISTER_SUCCESS',
                 payload: res.data
@@ -49,7 +82,6 @@ export const register = user => {
                 type: 'REGISTER_ERROR',
                 err: err.response.data
             })
-            console.log(err.response)
         }
     }
 }

@@ -36,19 +36,33 @@ router.get('/projects', authorizeToken, async (req, res) => {
     }
 })
 
-// Get all users by last name
+// Get all users by last name 
 router.get('/users', authorizeToken, async (req, res) => {
+    const { is_admin } = req.query;
     try {
-        const users = await pool.query(
-            `SELECT * FROM users
-                WHERE is_admin = $1
-                ORDER BY last_name ASC`,
-            [false]
-        )
-        if (users.rows.length === 0) {
-            return res.status(404).send('No registered users');
+        if (is_admin) {
+            const users = await pool.query(
+                `SELECT * FROM users
+                    WHERE is_admin = $1
+                    ORDER BY last_name ASC`,
+                [is_admin]
+            )
+            if (users.rows.length === 0) {
+                return res.status(404).send('No registered users');
+            }
+            res.status(200).json(users.rows)
         }
-        res.status(200).json(users.rows);
+
+        if (!is_admin) {
+            const users = await pool.query(
+                `SELECT * FROM users
+                ORDER BY last_name ASC`
+            )
+            if (users.rows.length === 0) {
+                return res.status(404).send('No registered users');
+            }
+            res.status(200).json(users.rows);
+        }
 
     } catch (err) {
         res.status(500).send('Server error');
@@ -65,6 +79,30 @@ router.get('/timesheets', authorizeToken, async (req, res) => {
             return res.status(404).send('No submitted timesheets');
         }
         res.status(200).json(timesheets.rows);
+
+    } catch (err) {
+        res.status(500).send('Server error');
+    }
+})
+
+// Get all entries for a timesheet
+router.get('/entries/:user_id/:week_start/:week_end', authorizeToken, async (req, res) => {
+    try {
+        const { user_id, week_start, week_end } = req.params;
+        // Get entries for the current week
+        const entries = await pool.query(
+            `SELECT * FROM entries
+                WHERE user_id = $1
+                AND date BETWEEN $2 AND $3
+                ORDER BY date DESC LIMIT 5`,
+            [user_id, week_start, week_end]
+        )
+        if (entries.rows.length === 0) {
+            return res.status(404).send('No submitted entries for this work week');
+        }
+        res.status(200).json({
+            entries: entries.rows
+        });
 
     } catch (err) {
         res.status(500).send('Server error');
@@ -137,7 +175,7 @@ router.put('/users/change-pw/:user_id', authorizeToken, async (req, res) => {
                 bcrypt.hash(newPassword, salt, async (err, hash) => {
                     if (err) throw new Error(err);
                     newPassword = hash;
-    
+
                     const changedPassUser = await pool.query(
                         `UPDATE users
                             SET password = $1
@@ -249,7 +287,7 @@ router.post('/projects', validate, authorizeToken, async (req, res) => {
                 RETURNING *`,
             [status, project_name, details, start_date, due_date]
         )
-        res.status(200).json({
+        res.status(201).json({
             message: 'Create project success',
             project: project.rows[0]
         })
@@ -329,7 +367,7 @@ router.post('/user-projects', authorizeToken, async (req, res) => {
                 RETURNING *`,
             [user_id, project_id]
         )
-        res.status(200).json(assignedProject.rows[0]);
+        res.status(201).json(assignedProject.rows[0]);
     } catch (err) {
         res.status(500).send('Server error');
     }

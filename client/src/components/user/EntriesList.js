@@ -85,7 +85,7 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => {
     return {
-        getEntries: (user_id) => dispatch(getEntries(user_id)),
+        getEntries: (user_id, week_start, week_end) => dispatch(getEntries(user_id, week_start, week_end)),
         deleteEntry: (entry_id) => dispatch(deleteEntry(entry_id)),
         submitTimesheet: (timesheet) => dispatch(submitTimesheet(timesheet))
     }
