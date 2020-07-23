@@ -21,7 +21,6 @@ export const getTimesheetEntries = (user_id, week_start, week_end) => {
     return async (dispatch) => {
         try {
             const res = await axios.get(`/admin/entries/${user_id}/${week_start}/${week_end}`)
-            console.log(res.data)
             dispatch({
                 type: 'GET_TIMESHEET_ENTRIES_SUCCESS',
                 payload: res.data.entries
@@ -80,6 +79,40 @@ export const register = user => {
         } catch (err) {
             dispatch({
                 type: 'REGISTER_ERROR',
+                err: err.response.data
+            })
+        }
+    }
+}
+
+export const updateUser = (user_id, user) => {
+    return async (dispatch) => {
+        try {
+            const res = await axios.put(`/admin/users/${user_id}`, user)
+            dispatch({
+                type: 'UPDATE_USER_SUCCESS',
+                payload: res.data
+            })
+        } catch (err) {
+            dispatch({
+                type: 'UPDATE_USER_ERROR',
+                err: err.response.data
+            })
+        }
+    }
+}
+
+export const updateUserPassword = (user_id, body) => {
+    return async (dispatch) => {
+        try {
+            const res = await axios.put(`/admin/users/change-password/${user_id}`, body)
+            dispatch({
+                type: 'UPDATE_PASSWORD_SUCCESS',
+                payload: res.data
+            })
+        } catch (err) {
+            dispatch({
+                type: 'UPDATE_PASSWORD_ERROR',
                 err: err.response.data
             })
         }

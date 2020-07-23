@@ -116,7 +116,7 @@ class Timesheets extends Component {
                                         <p className="col s4 center">{timesheet.total_entries}</p>
                                         <p className="col s4 center">{timesheet.total_hours}</p>
                                     </div>
-                                    <div className="collapsible-body" style={{ padding: '0' }}>
+                                    <div className="collapsible-body">
                                         <table className="centered">
                                             <thead>
                                                 <tr>
@@ -127,12 +127,13 @@ class Timesheets extends Component {
                                             <tbody>
                                                 {
                                                     // Load each entry for each timesheet
-                                                    timesheetEntries && timesheetEntries.map((entry, index) => (
+                                                    timesheetEntries ? timesheetEntries.map((entry, index) => (
                                                         <tr key={index}>
-                                                            <td>{entry.date}</td>
+                                                            <td>{moment(entry.date).format('MM/DD/yyyy')}</td>
                                                             <td>{entry.hours_worked}</td>
                                                         </tr>
-                                                    ))
+                                                    )) :
+                                                    null
                                                 }
                                             </tbody>
                                         </table>

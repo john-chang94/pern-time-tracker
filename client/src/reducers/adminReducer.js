@@ -4,7 +4,8 @@ const iniState = {
     timesheetsTotal: null,
     timesheetEntries: null,
     projects: null,
-    adminMessage: ''
+    adminMessage: '',
+    updateUserSuccess: null
 };
 
 export default (state = iniState, action) => {
@@ -47,6 +48,27 @@ export default (state = iniState, action) => {
             return {
                 ...state,
                 adminMessage: action.err
+            }
+        case 'UPDATE_USER_SUCCESS':
+            return {
+                ...state,
+                updateUserSuccess: true
+            }
+        case 'UPDATE_USER_ERROR':
+            return {
+                ...state,
+                updateUserSuccess: false
+            }
+        case 'UPDATE_PASSWORD_SUCCESS':
+            return {
+                ...state,
+                updatePasswordMessage: action.payload.message,
+                updateUserSuccess: true
+            }
+        case 'UPDATE_PASSWORD_ERROR':
+            return {
+                ...state,
+                updatePasswordMessage: action.err
             }
         default:
             return state

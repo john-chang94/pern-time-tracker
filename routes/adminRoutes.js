@@ -134,6 +134,10 @@ router.put('/users/:user_id', validate, authorizeToken, async (req, res) => {
         const { user_id } = req.params;
         const { first_name, last_name, username, email, is_admin } = req.body;
 
+        if (!first_name || !last_name || !username || !email) {
+            return res.status(400).send('Missing information')
+        }
+
         const user = await pool.query(
             `UPDATE users
                 SET first_name = $1,
@@ -156,19 +160,25 @@ router.put('/users/:user_id', validate, authorizeToken, async (req, res) => {
 })
 
 // Change user's password
-router.put('/users/change-pw/:user_id', authorizeToken, async (req, res) => {
+router.put('/users/change-password/:user_id', authorizeToken, async (req, res) => {
     try {
         const { user_id } = req.params;
-        let { password, newPassword } = req.body;
+        let { password, newPassword, confirmNewPassword } = req.body;
 
         const user = await pool.query(
             `SELECT * FROM users WHERE user_id = $1`,
             [user_id]
         )
 
+        // Check for user's current password
         const validPassword = await bcrypt.compare(password, user.rows[0].password);
         if (!validPassword) return res.status(400).send('Incorrect password');
 
+        // Check for new password and confirm new password to match
+        const newPasswordMatch = newPassword === confirmNewPassword;
+        if (!newPasswordMatch) return res.status(400).send('New password does not match');
+
+        // If password checks are fine, create a new hashed password
         if (validPassword) {
             bcrypt.genSalt(10, (err, salt) => {
                 if (err) throw new Error(err);
