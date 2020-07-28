@@ -13,7 +13,6 @@ CREATE TABLE users (
 
 CREATE TABLE projects (
     project_id SERIAL PRIMARY KEY,
-    status VARCHAR(255) NOT NULL,
     project_name VARCHAR(255) NOT NULL,
     details VARCHAR(255) NOT NULL,
     start_date DATE,

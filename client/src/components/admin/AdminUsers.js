@@ -7,12 +7,12 @@ import { getAllUsers } from '../../actions/adminActions';
 
 class AdminUsers extends Component {
     componentDidMount() {
-        const { token } = this.props;
-        if (token) {
-            // Set global headers for axios once token is in store
-            const tokenConfig = { 'token': token }
-            axios.defaults.headers = tokenConfig
-        }
+        // const { token } = this.props;
+        // if (token) {
+        //     // Set global headers for axios once token is in store
+        //     const tokenConfig = { 'token': token }
+        //     axios.defaults.headers = tokenConfig
+        // }
         this.props.getAllUsers();
     }
 

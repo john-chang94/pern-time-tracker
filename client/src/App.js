@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import './App.css';
 import 'materialize-css/dist/css/materialize.min.css';
 import { BrowserRouter, Switch, Route, Redirect } from 'react-router-dom';
 import { connect } from 'react-redux';
@@ -14,6 +15,7 @@ import { verify, setIsLoading, setToken } from './actions/authActions';
 import AdminHome from './components/admin/AdminHome';
 import Timesheets from './components/admin/Timesheets';
 import AdminUsers from './components/admin/AdminUsers';
+import AdminProjects from './components/admin/AdminProjects';
 
 class App extends Component {
   componentDidMount() {
@@ -69,6 +71,11 @@ class App extends Component {
               <Route exact path='/admin/users' render={props =>
                 authorized && isAdmin ?
                   <AdminUsers {...props} /> :
+                  <Redirect to='/admin' />}
+              />
+              <Route exact path='/admin/projects' render={props =>
+                authorized && isAdmin ?
+                  <AdminProjects {...props} /> :
                   <Redirect to='/admin' />}
               />
             </Switch>
