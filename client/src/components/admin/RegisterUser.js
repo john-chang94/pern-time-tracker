@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux';
-import { register } from '../../actions/adminActions';
+import { register, getAllUsers } from '../../actions/adminActions';
 
 class RegisterUser extends Component {
     state = {
@@ -25,13 +25,26 @@ class RegisterUser extends Component {
         }
     }
 
-    handleSubmit = e => {
+    handleSubmit = async (e) => {
         e.preventDefault();
         const user = {
             ...this.state
         }
-        delete user.showPassword
-        this.props.register(user);
+        delete user.showPassword;
+
+        await this.props.register(user);
+        if (this.props.registerSuccess) {
+            this.props.getAllUsers();
+            this.setState({
+                first_name: '',
+                last_name: '',
+                username: '',
+                email: '',
+                password: '',
+                is_admin: false,
+                showPassword: false
+            })
+        }
     }
 
     toggleShowPassword = e => {
@@ -41,7 +54,7 @@ class RegisterUser extends Component {
     }
 
     render() {
-        const { showPassword, is_admin } = this.state;
+        const { showPassword, first_name, last_name, username, email, password, is_admin } = this.state;
         const { adminMessage } = this.props;
         return (
             <div>
@@ -56,29 +69,29 @@ class RegisterUser extends Component {
                         </p>
                     </div>
                     <div className="input-field">
-                        <input type="text" id="first_name" onChange={this.handleChange} />
+                        <input type="text" id="first_name" value={first_name} onChange={this.handleChange} />
                         <label htmlFor="first_name">First Name</label>
                     </div>
                     <div className="input-field">
-                        <input type="text" id="last_name" onChange={this.handleChange} />
+                        <input type="text" id="last_name" value={last_name} onChange={this.handleChange} />
                         <label htmlFor="last_name">Last Name</label>
                     </div>
                     <div className="input-field">
-                        <input type="text" id="username" onChange={this.handleChange} />
+                        <input type="text" id="username" value={username} onChange={this.handleChange} />
                         <label htmlFor="username">Username</label>
                     </div>
                     <div className="input-field">
-                        <input type="email" id="email" onChange={this.handleChange} />
+                        <input type="email" id="email" value={email} onChange={this.handleChange} />
                         <label htmlFor="email">Email</label>
                     </div>
                     <div className="input-field">
-                        <input type={showPassword ? "text" : "password"} id="password" onChange={this.handleChange} />
+                        <input type={showPassword ? "text" : "password"} id="password" value={password} onChange={this.handleChange} />
                         <label htmlFor="password">Password</label>
                     </div>
                     <div className="input-field">
                         <p>
                             <label>
-                                <input type="checkbox" className="filled-in" id="showPassword" onChange={this.toggleShowPassword} />
+                                <input type="checkbox" className="filled-in" checked={showPassword} id="showPassword" onChange={this.toggleShowPassword} />
                                 <span>Show password</span>
                             </label>
                         </p>
@@ -95,13 +108,15 @@ class RegisterUser extends Component {
 
 const mapStateToProps = state => {
     return {
-        adminMessage: state.admin.adminMessage
+        adminMessage: state.admin.adminMessage,
+        registerSuccess: state.admin.registerSuccess
     }
 }
 
 const mapDispatchToProps = dispatch => {
     return {
-        register: (user) => dispatch(register(user))
+        register: (user) => dispatch(register(user)),
+        getAllUsers: () => dispatch(getAllUsers())
     }
 }
 

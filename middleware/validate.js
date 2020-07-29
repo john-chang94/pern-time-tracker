@@ -41,9 +41,6 @@ module.exports = (req, res, next) => {
             return res.status(401).send("Invalid Email");
         }
     } else if (req.path === '/projects') {
-        if (!status) {
-            return res.status(400).send('Project status required');
-        }
         if (!project_name) {
             return res.status(400).send('Project name required');
         }

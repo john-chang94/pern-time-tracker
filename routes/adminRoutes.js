@@ -279,8 +279,7 @@ router.get('/timesheets/:user_id/:start_date/:end_date', validate, authorizeToke
 // Post a new project
 router.post('/projects', validate, authorizeToken, async (req, res) => {
     try {
-        const { status, project_name, details, start_date, due_date } = req.body;
-
+        const { project_name, details, start_date, due_date } = req.body;
         // Check if project name already exists
         const findProject = await pool.query(
             'SELECT * FROM projects WHERE project_name = $1',
@@ -292,10 +291,10 @@ router.post('/projects', validate, authorizeToken, async (req, res) => {
 
         // Create a new project and add to projects table
         const project = await pool.query(
-            `INSERT INTO projects (status, project_name, details, start_date, due_date)
-                VALUES ($1, $2, $3, $4, $5)
+            `INSERT INTO projects (project_name, details, start_date, due_date)
+                VALUES ($1, $2, $3, $4)
                 RETURNING *`,
-            [status, project_name, details, start_date, due_date]
+            [project_name, details, start_date, due_date]
         )
         res.status(201).json({
             message: 'Create project success',

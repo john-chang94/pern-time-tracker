@@ -4,11 +4,11 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 
 const AdminHome = ({ token }) => {
-    // if (token) {
-    //     // Set global headers for axios once token is in store
-    //     const tokenConfig = { 'token': token }
-    //     axios.defaults.headers = tokenConfig
-    // }
+    if (token) {
+        // Set global headers for axios once token is in store
+        const tokenConfig = { 'token': token }
+        axios.defaults.headers = tokenConfig
+    }
 
     return (
         <div className="row section">

@@ -118,3 +118,54 @@ export const updateUserPassword = (user_id, body) => {
         }
     }
 }
+
+export const getAllProjects = () => {
+    return async (dispatch) => {
+        try {
+            const res = await axios.get('/admin/projects');
+            dispatch({
+                type: 'GET_ALL_PROJECTS_SUCCESS',
+                payload: res.data
+            })
+        } catch (err) {
+            dispatch({
+                type: 'GET_ALL_PROJECTS_ERROR',
+                err: err.response.data
+            })
+        }
+    }
+}
+
+export const createProject = project => {
+    return async (dispatch) => {
+        try {
+            const res = await axios.post('/admin/projects', project)
+            dispatch({
+                type: 'CREATE_PROJECT_SUCCESS',
+                payload: res.data
+            })
+        } catch (err) {
+            dispatch({
+                type: 'CREATE_PROJECT_ERROR',
+                err: err.response.data
+            })
+        }
+    }
+}
+
+export const assignUserProject = (user_project_ids) => {
+    return async (dispatch) => {
+        try {
+            const res = axios.post('/admin/user-projects', user_project_ids)
+            dispatch({
+                type: 'ASSIGN_USER_PROJECT_SUCCESS',
+                payload: res.data
+            })
+        } catch (err) {
+            dispatch({
+                type: 'ASSIGN_USER_PROJECT_ERROR',
+                err: err.response.data
+            })
+        }
+    }
+}
