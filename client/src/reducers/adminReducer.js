@@ -10,7 +10,9 @@ const iniState = {
     updatePasswordMessage: '',
     createProjectSuccess: null,
     createProjectMessage: '',
-    project_id: ''
+    updateProjectSuccess: null,
+    project_id: '',
+    members: []
 };
 
 export default (state = iniState, action) => {
@@ -103,6 +105,32 @@ export default (state = iniState, action) => {
                 ...state
             }
         case 'ASSIGN_USER_PROJECT_ERROR':
+            return {
+                ...state
+            }
+        case 'UPDATE_PROJECT_SUCCESS':
+            return {
+                ...state,
+                updateProjectSuccess: true
+            }
+        case 'UPDATE_PROJECT_ERROR':
+            return {
+                ...state
+            }
+        case 'REMOVE_USER_PROJECT_SUCCESS':
+            return {
+                ...state
+            }
+        case 'REMOVE_USER_PROJECT_ERROR':
+            return {
+                ...state
+            }
+        case 'GET_ALL_PROJECT_MEMBERS_SUCCESS':
+            return {
+                ...state,
+                members: action.payload
+            }
+        case 'GET_ALL_PROJECT_MEMBERS_ERROR':
             return {
                 ...state
             }

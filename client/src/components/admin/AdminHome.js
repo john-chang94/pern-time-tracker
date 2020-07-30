@@ -12,7 +12,7 @@ const AdminHome = ({ token }) => {
 
     return (
         <div className="row section">
-            <div className="col m3">
+            <div className="col s12 m4">
                 <Link to='/admin/timesheets'>
                     <div className="card">
                         <div className="center card-content">
@@ -22,7 +22,7 @@ const AdminHome = ({ token }) => {
                     </div>
                 </Link>
             </div>
-            <div className="col m3">
+            <div className="col s12 m4">
                 <Link to='/admin/users'>
                     <div className="card">
                         <div className="center card-content">
@@ -32,22 +32,12 @@ const AdminHome = ({ token }) => {
                     </div>
                 </Link>
             </div>
-            <div className="col m3">
+            <div className="col s12 m4">
                 <Link to='/admin/projects'>
                     <div className="card">
                         <div className="center card-content">
                             <i className="large orange-text material-icons">work</i>
                             <h5 className="center black-text">Projects</h5>
-                        </div>
-                    </div>
-                </Link>
-            </div>
-            <div className="col m3">
-                <Link to='/admin/settings'>
-                    <div className="card">
-                        <div className="center card-content">
-                            <i className="large black-text material-icons">settings</i>
-                            <h5 className="center black-text">Settings</h5>
                         </div>
                     </div>
                 </Link>

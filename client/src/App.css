@@ -7,4 +7,5 @@
   max-height: 400px;
   overflow-y: scroll;
   margin-top: 15px;
+  border: 1px solid rgb(219, 219, 219);
 }

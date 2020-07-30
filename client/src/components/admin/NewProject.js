@@ -14,10 +14,10 @@ class NewProject extends Component {
     }
 
     componentDidMount() {
-        const weekStart = document.querySelectorAll('#start_date');
-        M.Datepicker.init(weekStart, { disableWeekends: true, onSelect: this.selectStartDate });
-        const weekEnd = document.querySelectorAll('#due_date');
-        M.Datepicker.init(weekEnd, { disableWeekends: true, onSelect: this.selectDueDate });
+        const startDate = document.querySelectorAll('#start_date');
+        M.Datepicker.init(startDate, { disableWeekends: true, onSelect: this.selectStartDate });
+        const dueDate = document.querySelectorAll('#due_date');
+        M.Datepicker.init(dueDate, { disableWeekends: true, onSelect: this.selectDueDate });
     }
 
     handleChange = e => {

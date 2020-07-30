@@ -306,21 +306,20 @@ router.post('/projects', validate, authorizeToken, async (req, res) => {
 })
 
 // Update project info
-router.put('/projects/:project_id', validate, authorizeToken, async (req, res) => {
+router.put('/projects/:project_id', authorizeToken, async (req, res) => {
     try {
         const { project_id } = req.params;
-        const { status, project_name, details, start_date, due_date } = req.body;
+        const { project_name, details, start_date, due_date } = req.body;
 
         const project = await pool.query(
             `UPDATE projects
-                SET status = $1,
-                    project_name = $2,
-                    details = $3,
-                    start_date = $4,
-                    due_date = $5
-                WHERE project_id = $6
+                SET project_name = $1,
+                    details = $2,
+                    start_date = $3,
+                    due_date = $4
+                WHERE project_id = $5
                 RETURNING *`,
-            [status, project_name, details, start_date, due_date, project_id]
+            [project_name, details, start_date, due_date, project_id]
         )
         res.status(200).json({
             message: 'Project update success',

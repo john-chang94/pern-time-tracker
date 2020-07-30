@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux';
-import { getAllUsers } from '../../actions/adminActions'
+import { getAllUsers, getAllProjects, getAllProjectMembers } from '../../actions/adminActions'
 import NewProject from './NewProject'
 import ProjectList from './ProjectList';
 
@@ -10,6 +10,7 @@ class AdminProjects extends Component {
     }
     componentDidMount() {
         this.props.getAllUsers();
+        this.props.getAllProjects();
     }
 
     toggleShowCreateProject = () => {
@@ -19,7 +20,7 @@ class AdminProjects extends Component {
     }
 
     render() {
-        const { users } = this.props;
+        const { users, projects, getAllProjectMembers } = this.props;
         const { showCreateProject } = this.state;
         return (
             <div>
@@ -33,7 +34,7 @@ class AdminProjects extends Component {
                             New Project
                         </button>
                 }
-                <ProjectList />
+                <ProjectList projects={projects} getAllProjectMembers={getAllProjectMembers} />
             </div>
         );
     }
@@ -41,13 +42,16 @@ class AdminProjects extends Component {
 
 const mapStateToProps = state => {
     return {
-        users: state.admin.users
+        users: state.admin.users,
+        projects: state.admin.projects
     }
 }
 
 const mapDispatchToProps = dispatch => {
     return {
-        getAllUsers: () => dispatch(getAllUsers())
+        getAllUsers: () => dispatch(getAllUsers()),
+        getAllProjects: () => dispatch(getAllProjects()),
+        getAllProjectMembers: (project_id) => dispatch(getAllProjectMembers(project_id))
     }
 }
 

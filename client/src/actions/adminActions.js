@@ -169,3 +169,54 @@ export const assignUserProject = (user_project_ids) => {
         }
     }
 }
+
+export const removeUserProject = (user_id, project_id) => {
+    return async (dispatch) => {
+        try {
+            const res = await axios.delete(`/admin/user-projects/${user_id}/${project_id}`)
+            dispatch({
+                type: 'REMOVE_USER_PROJECT_SUCCESS',
+                payload: res.data
+            })
+        } catch (err) {
+            dispatch({
+                type: 'REMOVE_USER_PROJECT_ERROR',
+                err: err.response.data
+            })
+        }
+    }
+}
+
+export const updateProject = (project_id, updatedProject) => {
+    return async (dispatch) => {
+        try {
+            const res = await axios.put(`/admin/projects/${project_id}`, updatedProject)
+            dispatch({
+                type: 'UPDATE_PROJECT_SUCCESS',
+                payload: res.data
+            })
+        } catch (err) {
+            dispatch({
+                type: 'UPDATE_PROJECT_ERROR',
+                err: err.response.data
+            })
+        }
+    }
+}
+
+export const getAllProjectMembers = project_id => {
+    return async (dispatch) => {
+        try {
+            const res = await axios.get(`/admin/user-projects/${project_id}`)
+            dispatch({
+                type: 'GET_ALL_PROJECT_MEMBERS_SUCCESS',
+                payload: res.data
+            })
+        } catch (err) {
+            dispatch({
+                type: 'GET_ALL_PROJECT_MEMBERS_ERROR',
+                err: err.response.data
+            })
+        }
+    }
+}
