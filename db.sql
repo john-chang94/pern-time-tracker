@@ -48,13 +48,13 @@ CREATE TABLE weekly_timesheets (
 );
 
 INSERT INTO projects (project_name, details)
-VALUES ('Project 1', 'Details coming soon')
-VALUES ('Project 2', 'Details coming soooooon');
+VALUES ('Project 1', 'Details coming soon'),
+('Project 2', 'Details coming soooooon');
 
 INSERT INTO user_projects (user_id, project_id)
-VALUES ('b04f55ea-57fc-446a-8533-b69d55ff785b', 1)
-VALUES ('b04f55ea-57fc-446a-8533-b69d55ff785b', 2)
-VALUES ('6a972509-7d2e-4a57-8f00-a0712da6e5da', 2);
+VALUES ('b04f55ea-57fc-446a-8533-b69d55ff785b', 1),
+('b04f55ea-57fc-446a-8533-b69d55ff785b', 2),
+('6a972509-7d2e-4a57-8f00-a0712da6e5da', 2);
 
 INSERT INTO weekly_timesheets (user_id, week_start, week_end, total_entries, total_hours)
 VALUES ('b04f55ea-57fc-446a-8533-b69d55ff785b', '2020-06-28', '2020-07-04', 5, 38);
